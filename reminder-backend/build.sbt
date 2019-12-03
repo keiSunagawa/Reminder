@@ -7,7 +7,7 @@ ThisBuild / organizationName := "example"
 
 lazy val root = (project in file("."))
   .settings(
-    name := "reminder-server",
+    name := "reminder-backend",
     libraryDependencies += scalaTest % Test
   )
 
