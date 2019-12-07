@@ -1,16 +1,17 @@
 apiVersion: v1
 kind: Service
 metadata:
-  name: {{ include "remind.fullname" . }}
+  name: "reminder-server-svc"
   labels:
 {{ include "remind.labels" . | indent 4 }}
 spec:
-  type: {{ .Values.service.type }}
+  type: NodePort
   ports:
-    - port: {{ .Values.service.port }}
-      targetPort: http
+    - name: http
       protocol: TCP
-      name: http
+      port: 8080 # for inner access
+      targetPort: 8080
+      nodePort: 30080
   selector:
     app.kubernetes.io/name: {{ include "remind.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

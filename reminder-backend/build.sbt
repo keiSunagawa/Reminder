@@ -35,16 +35,20 @@ lazy val `reminder-server` = (project in file("./server"))
   "-Xfatal-warnings",
   ),
   dockerfile in docker := {
-  // The assembly task generates a fat JAR file
-  val artifact: File = assembly.value
-  val artifactTargetPath = s"/app/${artifact.name}"
+    // The assembly task generates a fat JAR file
+    val artifact: File = assembly.value
+    val artifactTargetPath = s"/app/${artifact.name}"
 
-  new Dockerfile {
-    from("openjdk:8-jre")
-    add(artifact, artifactTargetPath)
-    entryPoint("java", "-jar", artifactTargetPath)
-  }
-}
+    new Dockerfile {
+      from("openjdk:8-jre")
+      add(artifact, artifactTargetPath)
+      entryPoint("java", "-jar", artifactTargetPath)
+    }
+  },
+  imageNames in docker := Seq(
+    // Sets the latest tag
+    ImageName(s"keisunagawa/${name.value}:latest"),
+  )
 ).dependsOn(core)
 
 lazy val root = (project in file(".")).aggregate(core, `reminder-server`)
