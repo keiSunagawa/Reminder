@@ -12,6 +12,19 @@ lazy val core = (project in file("./core")).settings(
   )
 )
 
+lazy val server = (project in file("./server")).settings(
+  libraryDependencies ++= Seq(
+    "com.softwaremill.sttp.tapir" %% "tapir-core" % "0.12.7",
+    "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % "0.12.7",
+    "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % "0.12.7",
+    "io.circe" %% "circe-generic" % "v0.12.3",
+    "io.circe" %% "circe-generic" % "v0.12.3",
+    "io.circe" %% "circe-parser" % "v0.12.3",
+        "org.http4s" %% "http4s-circe" % "0.21.0-M5",
+    "org.scalatest" %% "scalatest" % "3.0.5" % Test
+  )
+).dependsOn(core)
+
 lazy val root = (project in file(".")).aggregate(core)
 
 // Uncomment the following for publishing to Sonatype.
