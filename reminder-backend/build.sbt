@@ -4,17 +4,32 @@ ThisBuild / organization     := "com.kerfume"
 
 val catsVersion = "2.0.0"
 
-lazy val core = (project in file("./core")).settings(
-  libraryDependencies ++= Seq(
+val commonLibs = Seq(
     "org.typelevel" %% "cats-core" % catsVersion,
     "org.scalatest" %% "scalatest" % "3.0.5" % Test
+)
+
+lazy val core = (project in file("./core")).settings(
+  libraryDependencies ++= commonLibs
+)
+
+lazy val rpc = (project in file("./rpc")).settings(
+  PB.targets in Compile := Seq(
+     scalapb.gen() -> (sourceManaged in Compile).value
+  ),
+
+  libraryDependencies ++= commonLibs ++ Seq(
+    "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
+    "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,
+    "io.grpc" % "grpc-all" % scalapb.compiler.Version.grpcJavaVersion,
+    "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion
   )
 )
 
 lazy val `reminder-server` = (project in file("./server"))
   .enablePlugins(DockerPlugin)
   .settings(
-  libraryDependencies ++= Seq(
+  libraryDependencies ++= commonLibs ++ Seq(
     "com.softwaremill.sttp.tapir" %% "tapir-core" % "0.12.7",
     "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % "0.12.7",
     "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % "0.12.7",
