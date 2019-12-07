@@ -20,8 +20,18 @@ lazy val server = (project in file("./server")).settings(
     "io.circe" %% "circe-generic" % "v0.12.3",
     "io.circe" %% "circe-generic" % "v0.12.3",
     "io.circe" %% "circe-parser" % "v0.12.3",
-        "org.http4s" %% "http4s-circe" % "0.21.0-M5",
+    "org.http4s" %% "http4s-circe" % "0.21.0-M5",
+    "com.lihaoyi" %% "scalatags" % "0.7.0",
     "org.scalatest" %% "scalatest" % "3.0.5" % Test
+  ),
+  scalacOptions ++= Seq(
+  "-deprecation",
+  "-encoding", "UTF-8",
+  "-language:higherKinds",
+  "-language:postfixOps",
+  "-feature",
+  "-Ypartial-unification",
+  "-Xfatal-warnings",
   )
 ).dependsOn(core)
 

@@ -4,6 +4,8 @@ import cats.effect.IOApp
 import cats.effect.{ExitCode, IO}
 import org.http4s.HttpRoutes
 import org.http4s.HttpApp
+import cats.SemigroupK.ops._
+import org.http4s.implicits._
 
 object ReminderServer extends IOApp {
   import sttp.tapir._
@@ -17,8 +19,13 @@ object ReminderServer extends IOApp {
       IO(Application.registController.registByDate(p))
     }
 
+  val listRoute: HttpRoutes[IO] =
+    list.toRoutes { p =>
+      IO(Application.registController.list())
+    }
+
   val reminderApp: HttpApp[IO] =
-    registRoute orNotFound
+    (registRoute <+> listRoute).orNotFound
 
   def run(args: List[String]): IO[ExitCode] = {
     BlazeServerBuilder[IO]

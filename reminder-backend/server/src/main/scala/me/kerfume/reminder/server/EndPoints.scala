@@ -18,4 +18,9 @@ object EndPoints {
       .in(jsonBody[RegistByDateParam])
       .out(stringBody)
       .errorOut(stringBody)
+
+  val list: Endpoint[Unit, Unit, String, Nothing] =
+    endpoint.get
+      .in("list")
+      .out(htmlBodyUtf8)
 }
