@@ -22,6 +22,7 @@ be found at [https://hexdocs.pm/statefull](https://hexdocs.pm/statefull).
 
 ## create grpc code
 ```
+$ cd ./rpc-compiler && docker build -t elixer-pbuf-compiler .
 $ docker run -it elixer-pbuf-compiler:latest bash
 $ docker run -v <your_protbuf_projectdir>:/pb/ -it elixer-pbuf-compiler:latest bash
 $ <in container> protoc --elixir_out=plugins=grpc:./lib/ ./protbuf/*.proto

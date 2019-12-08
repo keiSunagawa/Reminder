@@ -1,19 +1,12 @@
 FROM elixir:1.9.4
 
-RUN apt-get update && apt-get install autoconf automake libtool curl make g++ unzip
+ADD . /src
 
-RUN git clone https://github.com/protocolbuffers/protobuf.git \
-        && cd protobuf \
-        && git submodule update --init --recursive \
-        && ./autogen.sh
+RUN cd /src && \
+        mix local.hex --force && \
+        mix local.rebar --force && \
+        mix deps.get -y && \
+        mix compile
 
-RUN cd protobuf && ./configure \
-        && make \
-        && make check \
-        && make install \
-        && ldconfig # refresh shared library cache.
-
-# RUN mix escript.install hex protobuf
-RUN echo "export PATH=$PATH:/root/.mix/escripts" >> ~/.bashrc
-
-ENTRYPOINT bash
+RUN export PATH=$PATH:/root/.mix/escripts && mix escript.install hex protobuf
+ENTRYPOINT cd /src && mix grpc.server
