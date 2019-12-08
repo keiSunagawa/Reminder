@@ -1,12 +1,12 @@
 # Define your endpoint
-defmodule Helloworld.Endpoint do
+defmodule Reminder.Endpoint do
   use GRPC.Endpoint
 
   intercept GRPC.Logger.Server
-  run Helloworld.Greeter.Server
+  run ReminderRpcServer
 end
-# In the start function of your Application
-defmodule HelloworldApp do
+
+defmodule ReminderApp do
   use Application
 
   def start(_type, _args) do
@@ -17,7 +17,7 @@ defmodule HelloworldApp do
       {Remind.RemindList, []}
     ]
 
-    opts = [strategy: :one_for_one, name: HelloworldApp]
+    opts = [strategy: :one_for_one, name: ReminderApp]
     Supervisor.start_link(children, opts)
   end
 end
