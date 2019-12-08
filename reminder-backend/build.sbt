@@ -49,34 +49,35 @@ lazy val infra = (project in file("./infra")).settings(
 lazy val `reminder-server` = (project in file("./server"))
   .enablePlugins(DockerPlugin)
   .settings(
-  libraryDependencies ++= commonLibs ++ Seq(
-    "com.softwaremill.sttp.tapir" %% "tapir-core" % "0.12.7",
-    "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % "0.12.7",
-    "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % "0.12.7",
-    "io.circe" %% "circe-generic" % "v0.12.3",
-    "io.circe" %% "circe-generic" % "v0.12.3",
-    "io.circe" %% "circe-parser" % "v0.12.3",
-    "org.http4s" %% "http4s-circe" % "0.21.0-M5",
-    "com.lihaoyi" %% "scalatags" % "0.7.0",
-    "org.scalatest" %% "scalatest" % "3.0.5" % Test
-  ),
-  scalacOptions ++= baseOptions,
-  dockerfile in docker := {
-    // The assembly task generates a fat JAR file
-    val artifact: File = assembly.value
-    val artifactTargetPath = s"/app/${artifact.name}"
+    libraryDependencies ++= commonLibs ++ Seq(
+      "com.typesafe" % "config" % "1.4.0",
+      "com.softwaremill.sttp.tapir" %% "tapir-core" % "0.12.7",
+      "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % "0.12.7",
+      "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % "0.12.7",
+      "io.circe" %% "circe-generic" % "v0.12.3",
+      "io.circe" %% "circe-generic" % "v0.12.3",
+      "io.circe" %% "circe-parser" % "v0.12.3",
+      "org.http4s" %% "http4s-circe" % "0.21.0-M5",
+      "com.lihaoyi" %% "scalatags" % "0.7.0",
+      "org.scalatest" %% "scalatest" % "3.0.5" % Test
+    ),
+    scalacOptions ++= baseOptions,
+    dockerfile in docker := {
+      // The assembly task generates a fat JAR file
+      val artifact: File = assembly.value
+      val artifactTargetPath = s"/app/${artifact.name}"
 
-    new Dockerfile {
-      from("openjdk:8-jre")
-      add(artifact, artifactTargetPath)
-      entryPoint("java", "-jar", artifactTargetPath)
-    }
-  },
-  imageNames in docker := Seq(
-    // Sets the latest tag
-    ImageName(s"keisunagawa/${name.value}:latest"),
-  )
-).dependsOn(core, infra)
+      new Dockerfile {
+        from("openjdk:8-jre")
+        add(artifact, artifactTargetPath)
+        entryPoint("java", "-jar", artifactTargetPath, "-prod")
+      }
+    },
+    imageNames in docker := Seq(
+      // Sets the latest tag
+      ImageName(s"keisunagawa/${name.value}:latest"),
+    )
+  ).dependsOn(core, infra)
 
 lazy val root = (project in file(".")).aggregate(
   core,

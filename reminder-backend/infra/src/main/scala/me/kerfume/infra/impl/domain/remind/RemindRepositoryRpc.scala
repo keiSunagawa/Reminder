@@ -8,11 +8,13 @@ import java.time.format.DateTimeFormatter
 
 import com.kerfume.remind.protos.ReminderService.RemindListServiceGrpc
 import me.kerfume.reminder.domain.seqid.SeqID
-import me.kerfume.rpc.{ClientSupport, GrpcDataType}
+import me.kerfume.rpc.{ClientSupport, GrpcDataType, RpcEndpoint}
 
-class RemindRepositoryRpc extends RemindRepository[IO] {
+class RemindRepositoryRpc(
+    endpoint: RpcEndpoint
+) extends RemindRepository[IO] {
   private val rpcStub = RemindListServiceGrpc.blockingStub(
-    ClientSupport.getChannel("localhost", 50051)
+    ClientSupport.getChannel(endpoint.host, endpoint.port)
   )
   private val fmt = DateTimeFormatter.ofPattern("uuuu-MM-dd")
 
@@ -27,14 +29,18 @@ class RemindRepositoryRpc extends RemindRepository[IO] {
     rpcStub.add(data)
   }
   def findAll(): IO[List[Remind]] = IO {
-    rpcStub.list(GrpcDataType.empty).reminds.map { rorg =>
-      Remind.OfDate(
-        SeqID(rorg.seqNum),
-        rorg.title,
-        None,
-        LocalDate.parse(rorg.trigger ,fmt)
-      )
-    }.toList
+    rpcStub
+      .list(GrpcDataType.empty)
+      .reminds
+      .map { rorg =>
+        Remind.OfDate(
+          SeqID(rorg.seqNum),
+          rorg.title,
+          None,
+          LocalDate.parse(rorg.trigger, fmt)
+        )
+      }
+      .toList
   }
   def findByTriggerIsTime(
       now: LocalDateTime
@@ -42,12 +48,12 @@ class RemindRepositoryRpc extends RemindRepository[IO] {
     findAll().map { reminds =>
       reminds.collect {
         case r: Remind.OfDate if {
-          val dt = r.trigger.atTime(0, 0)
-          dt.isBefore(now) || dt.isEqual(now)
-        } =>
+              val dt = r.trigger.atTime(0, 0)
+              dt.isBefore(now) || dt.isEqual(now)
+            } =>
           r
         case r: Remind.OfDateTime
-          if r.trigger.isBefore(now) || r.trigger.isEqual(now) =>
+            if r.trigger.isBefore(now) || r.trigger.isEqual(now) =>
           r
       }: List[Remind with Remind.TriggerIsTime]
     }

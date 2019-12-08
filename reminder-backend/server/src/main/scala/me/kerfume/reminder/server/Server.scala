@@ -6,6 +6,7 @@ import org.http4s.HttpRoutes
 import org.http4s.HttpApp
 import cats.SemigroupK.ops._
 import org.http4s.implicits._
+import me.kerfume.reminder.server.controller.RegistController
 
 object ReminderServer extends IOApp {
   import sttp.tapir._
@@ -14,19 +15,32 @@ object ReminderServer extends IOApp {
 
   import EndPoints._
 
-  val registRoute: HttpRoutes[IO] =
-    regist.toRoutes { p => Application.registController.registByDate(p) }
+  def registRoute(registCtr: RegistController[IO]): HttpRoutes[IO] =
+    regist.toRoutes { p =>
+      registCtr.registByDate(p)
+    }
 
-  val listRoute: HttpRoutes[IO] =
-    list.toRoutes { _ => Application.registController.list() }
+  def listRoute(registCtr: RegistController[IO]): HttpRoutes[IO] =
+    list.toRoutes { _ =>
+      registCtr.list()
+    }
 
-  val reminderApp: HttpApp[IO] =
-    (registRoute <+> listRoute).orNotFound
+  def reminderApp(
+      registCtr: RegistController[IO]
+  ): HttpApp[IO] =
+    (registRoute(registCtr) <+> listRoute(registCtr)).orNotFound
 
   def run(args: List[String]): IO[ExitCode] = {
+    val env =
+      if (args.headOption.contains("-prod")) AppConfig.Env.Prod
+      else AppConfig.Env.Local
+    val config = AppConfig.getConfig(env)
+
+    val app = new Application(config)
+
     BlazeServerBuilder[IO]
       .bindHttp(8080, "0.0.0.0")
-      .withHttpApp(reminderApp)
+      .withHttpApp(reminderApp(app.registController))
       .serve
       .compile
       .drain

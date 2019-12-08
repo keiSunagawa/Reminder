@@ -4,10 +4,14 @@ import me.kerfume.infra.impl.domain.remind.RemindRepositoryRpc
 import me.kerfume.reminder.server.controller.RegistController
 import me.kerfume.reminder.domain.remind.{Remind, RemindService}
 import me.kerfume.reminder.domain.consumer.{Consumer, ConsumerInMemory}
-import me.kerfume.reminder.domain.seqid.{SeqID, SeqIDRepository, SeqIDRepositoryInMemory}
+import me.kerfume.reminder.domain.seqid.{
+  SeqID,
+  SeqIDRepository,
+  SeqIDRepositoryInMemory
+}
 
-object Application {
-  val remindRepository = new RemindRepositoryRpc
+class Application(config: AppConfig) {
+  val remindRepository = new RemindRepositoryRpc(config.rpcEndpoint)
   val seqIDRepository = new IOWrapper.SeqIDRepositoryIOWrapper
   val consumer = new IOWrapper.ConsumerIOWrapper
   val remindService = new RemindService(
@@ -22,7 +26,7 @@ object Application {
 object IOWrapper {
   class SeqIDRepositoryIOWrapper extends SeqIDRepository[IO] {
     private val internal = new SeqIDRepositoryInMemory
-    override def generate(): IO[SeqID] = IO { internal.generate()}
+    override def generate(): IO[SeqID] = IO { internal.generate() }
   }
 
   class ConsumerIOWrapper extends Consumer[IO] {
