@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: "statefull-svc"
+  labels:
+{{ include "remind.labels" . | indent 4 }}
+spec:
+  ports:
+    - name: http
+      protocol: TCP
+      port: 50051 # for inner access
+      targetPort: 50051
+  selector:
+    app.kubernetes.io/name: {{ include "remind.statefull_server.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

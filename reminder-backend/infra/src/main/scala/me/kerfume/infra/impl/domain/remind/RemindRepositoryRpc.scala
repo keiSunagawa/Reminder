@@ -28,20 +28,28 @@ class RemindRepositoryRpc(
 
     rpcStub.add(data)
   }
-  def findAll(): IO[List[Remind]] = IO {
-    rpcStub
-      .list(GrpcDataType.empty)
-      .reminds
-      .map { rorg =>
-        Remind.OfDate(
-          SeqID(rorg.seqNum),
-          rorg.title,
-          None,
-          LocalDate.parse(rorg.trigger, fmt)
-        )
-      }
-      .toList
-  }
+  import cats.syntax.all._
+  def findAll(): IO[List[Remind]] =
+    IO {
+      println(endpoint)
+      rpcStub
+        .list(GrpcDataType.empty)
+        .reminds
+        .map { rorg =>
+          Remind.OfDate(
+            SeqID(rorg.seqNum),
+            rorg.title,
+            None,
+            LocalDate.parse(rorg.trigger, fmt)
+          )
+        }
+        .toList
+    }.onError {
+      case e: Throwable =>
+        e.printStackTrace()
+        println(e)
+        IO.unit
+    }
   def findByTriggerIsTime(
       now: LocalDateTime
   ): IO[List[Remind with Remind.TriggerIsTime]] = {

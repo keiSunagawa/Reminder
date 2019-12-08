@@ -9,9 +9,9 @@ spec:
   ports:
     - name: http
       protocol: TCP
-      port: 8080 # for inner access
+      port: 50001 # for inner access
       targetPort: 8080
       nodePort: 30080
   selector:
-    app.kubernetes.io/name: {{ include "remind.name" . }}
+    app.kubernetes.io/name: {{ include "remind.api_server.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

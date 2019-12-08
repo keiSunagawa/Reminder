@@ -34,6 +34,8 @@ object ReminderServer extends IOApp {
     val env =
       if (args.headOption.contains("-prod")) AppConfig.Env.Prod
       else AppConfig.Env.Local
+
+    println(s"start with ${env}")
     val config = AppConfig.getConfig(env)
 
     val app = new Application(config)

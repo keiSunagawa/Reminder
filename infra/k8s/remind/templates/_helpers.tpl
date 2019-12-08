@@ -43,3 +43,11 @@ app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- end -}}
+
+{{- define "remind.api_server.name" -}}
+"reminder-api-server"
+{{- end -}}
+
+{{- define "remind.statefull_server.name" -}}
+"reminder-statefull-server"
+{{- end -}}
