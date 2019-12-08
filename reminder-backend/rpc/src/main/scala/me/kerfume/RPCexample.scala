@@ -33,14 +33,15 @@ object ServerRunner {
   }
 }
 object ClientRunner {
+  import com.kerfume.remind.protos.ReminderService.{RemindListServiceGrpc}
   def run(): Unit = {
     val channel = ManagedChannelBuilder
-      .forAddress("localhost", 9999)
+      .forAddress("localhost", 50051)
       .usePlaintext(true)
       .build
-    val request = HelloRequest(name = "World")
-    val blockingStub = GreeterGrpc.blockingStub(channel)
-    val reply: HelloReply = blockingStub.sayHello(request)
+    val request = new _root_.com.google.protobuf.empty.Empty
+    val blockingStub = RemindListServiceGrpc.blockingStub(channel)
+    val reply = blockingStub.list(request)
     println(reply)
   }
 }
