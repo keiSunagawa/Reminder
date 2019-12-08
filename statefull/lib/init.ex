@@ -20,4 +20,8 @@ defmodule ReminderApp do
     opts = [strategy: :one_for_one, name: ReminderApp]
     Supervisor.start_link(children, opts)
   end
+
+  def stop(_) do
+    IO.inspect "#{__MODULE__}.stop"
+  end
 end
