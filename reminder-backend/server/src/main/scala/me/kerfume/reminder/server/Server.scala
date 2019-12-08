@@ -15,14 +15,10 @@ object ReminderServer extends IOApp {
   import EndPoints._
 
   val registRoute: HttpRoutes[IO] =
-    regist.toRoutes { p =>
-      IO(Application.registController.registByDate(p))
-    }
+    regist.toRoutes { p => Application.registController.registByDate(p) }
 
   val listRoute: HttpRoutes[IO] =
-    list.toRoutes { p =>
-      IO(Application.registController.list())
-    }
+    list.toRoutes { _ => Application.registController.list() }
 
   val reminderApp: HttpApp[IO] =
     (registRoute <+> listRoute).orNotFound

@@ -14,6 +14,6 @@ RUN cd protobuf && ./configure \
         && ldconfig # refresh shared library cache.
 
 # RUN mix escript.install hex protobuf
-RUN echo "export PATH=$PATH:/root/.mix/escripts" >> ~/.bash_profile
+RUN echo "export PATH=$PATH:/root/.mix/escripts" >> ~/.bashrc
 
 ENTRYPOINT bash

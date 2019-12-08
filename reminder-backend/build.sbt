@@ -9,7 +9,18 @@ val commonLibs = Seq(
     "org.scalatest" %% "scalatest" % "3.0.5" % Test
 )
 
+val baseOptions = Seq(
+  "-deprecation",
+  "-encoding", "UTF-8",
+  "-language:higherKinds",
+  "-language:postfixOps",
+  "-feature",
+  "-Ypartial-unification",
+  "-Xfatal-warnings",
+)
+
 lazy val core = (project in file("./core")).settings(
+  scalacOptions ++= baseOptions,
   libraryDependencies ++= commonLibs
 )
 
@@ -18,13 +29,22 @@ lazy val rpc = (project in file("./rpc")).settings(
      scalapb.gen() -> (sourceManaged in Compile).value
   ),
 
+  scalacOptions ++= baseOptions,
   libraryDependencies ++= commonLibs ++ Seq(
+    "org.typelevel" %% "cats-effect" % catsVersion,
     "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
     "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,
     "io.grpc" % "grpc-all" % scalapb.compiler.Version.grpcJavaVersion,
     "com.thesamet.scalapb" %% "scalapb-runtime-grpc" % scalapb.compiler.Version.scalapbVersion
   )
 )
+
+lazy val infra = (project in file("./infra")).settings(
+  scalacOptions ++= baseOptions,
+  libraryDependencies ++= commonLibs ++ Seq(
+    "org.typelevel" %% "cats-effect" % catsVersion
+  )
+).dependsOn(core, rpc)
 
 lazy val `reminder-server` = (project in file("./server"))
   .enablePlugins(DockerPlugin)
@@ -40,15 +60,7 @@ lazy val `reminder-server` = (project in file("./server"))
     "com.lihaoyi" %% "scalatags" % "0.7.0",
     "org.scalatest" %% "scalatest" % "3.0.5" % Test
   ),
-  scalacOptions ++= Seq(
-  "-deprecation",
-  "-encoding", "UTF-8",
-  "-language:higherKinds",
-  "-language:postfixOps",
-  "-feature",
-  "-Ypartial-unification",
-  "-Xfatal-warnings",
-  ),
+  scalacOptions ++= baseOptions,
   dockerfile in docker := {
     // The assembly task generates a fat JAR file
     val artifact: File = assembly.value
@@ -64,6 +76,11 @@ lazy val `reminder-server` = (project in file("./server"))
     // Sets the latest tag
     ImageName(s"keisunagawa/${name.value}:latest"),
   )
-).dependsOn(core)
+).dependsOn(core, infra)
 
-lazy val root = (project in file(".")).aggregate(core, `reminder-server`)
+lazy val root = (project in file(".")).aggregate(
+  core,
+  infra,
+  `reminder-server`,
+  rpc
+)

@@ -3,13 +3,13 @@ defmodule Com.Kerfume.Remind.Protos.RemindOfDate do
   use Protobuf, syntax: :proto3
 
   @type t :: %__MODULE__{
-          seqNum: String.t(),
+          seqNum: non_neg_integer,
           title: String.t(),
           trigger: String.t()
         }
   defstruct [:seqNum, :title, :trigger]
 
-  field :seqNum, 1, type: :string
+  field :seqNum, 1, type: :uint64
   field :title, 2, type: :string
   field :trigger, 3, type: :string
 end
