@@ -24,10 +24,17 @@ spec:
         - name: "reminder-statefull"
           image: "keisunagawa/reminder-statefull:latest"
           imagePullPolicy: Always
+          lifecycle:
+            preStop:
+              exec:
+                command: ["/bin/sh", "-c", "kill $(ps aux | grep \"beam\" | grep -v \"grep\" |  awk '{ print $2 }')"]
           ports:
             - name: http
               containerPort: 50051
               protocol: TCP
+          volumeMounts:
+            - mountPath: /tmp/reminder/persistent
+              name: reminder-list-dir
           # livenessProbe:
           #   httpGet:
           #     path: /list
@@ -36,3 +43,8 @@ spec:
           #   httpGet:
           #     path: /list
           #     port: http
+      volumes:
+        - name: reminder-list-dir
+          hostPath:
+            path: /tmp/k8s/host_path_dir
+            type: DirectoryOrCreate

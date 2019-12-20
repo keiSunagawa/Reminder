@@ -23,7 +23,7 @@ spec:
       containers:
         - name: "reminder-server"
           image: "keisunagawa/reminder-server:latest"
-          imagePullPolicy: IfNotPresent
+          imagePullPolicy: Always
           ports:
             - name: http
               containerPort: 8080

@@ -1,22 +1,27 @@
 defmodule Remind.RemindList do
-  use GenServer
+  use GenServer, shutdown: 10_000
+
+  @strage_path "/tmp/reminder/persistent"
 
   ### GenServer API
 
   @doc """
   GenServer.init/1コールバック
   """
-  def init(state) do
+  def init(_state) do
+    initialList = Remind.Loader.load_list(@strage_path)
     # call terminate by receive SIGTERM
     Process.flag(:trap_exit, true)
+
     IO.puts("starting ReminserList process....")
-    {:ok, state}
+    {:ok, initialList}
   end
 
   def terminate(_reason, state) do
     IO.puts("terminate ReminserList process....")
-    Process.sleep(2000)
-    save_snapshot(state)
+
+    Remind.Loader.save_list(@strage_path, state)
+
     IO.puts("terminate done.")
   end
 
@@ -29,7 +34,7 @@ defmodule Remind.RemindList do
 
   def handle_call(:save, _from, state) do
     # TODO save処理中のリクエストのロック & 破棄
-    save_snapshot(state)
+    Remind.Loader.save_list(@strage_path, state)
     {:reply, :ok, state}
   end
 
@@ -39,13 +44,6 @@ defmodule Remind.RemindList do
   """
   def handle_cast({:add, value}, state) do
     {:noreply, [value|state]}
-  end
-
-
-
-  defp save_snapshot(state) do
-    IO.puts("saving...")
-    # stateをファイルへ吐き出し
   end
 
   ### for Client
