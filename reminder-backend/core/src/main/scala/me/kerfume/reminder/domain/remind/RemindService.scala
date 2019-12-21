@@ -12,6 +12,7 @@ import Remind.RemindStatus
 import me.kerfume.reminder.domain.seqid.SeqID
 import cats.Applicative
 import RemindService._
+import scala.util.chaining._
 
 class RemindService[F[_]: Monad](
     repository: RemindRepository[F],
@@ -51,9 +52,8 @@ class RemindService[F[_]: Monad](
     for {
       reminds <- repository.findByTriggerIsTime(now)
       _ <- reminds.traverse(consumer.tell)
-      _ <- reminds.traverse { rm =>
-        val trgd = rm.triggered
-        repository.store(trgd)
+      _ <- reminds.traverse {
+        _.triggered.pipe(repository.store)
       }
     } yield ()
   }
@@ -62,10 +62,8 @@ class RemindService[F[_]: Monad](
     for {
       remindOps <- repository.findByID(id)
       res <- remindOps match {
-        case Some(r) =>
-          val resolved = r.resolve
-          println(resolved)
-          repository.store(resolved).map(Right(_))
+        case Some(rm) =>
+          rm.resolve.pipe(repository.store).map(Right(_))
         case None =>
           Applicative[F].pure(Left(RemindNotFound(id)))
       }
