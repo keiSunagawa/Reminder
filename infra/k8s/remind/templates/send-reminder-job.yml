@@ -1,0 +1,22 @@
+apiVersion: batch/v1beta1
+kind: CronJob
+metadata:
+  name: "reminder-batch-send-reminder"
+spec:
+  schedule: "30 10 * * *"
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      backoffLimit: 1
+      template:
+        spec:
+          containers:
+          - name: "reminder-batch-send-reminder"
+            image: keisunagawa/reminder-batch:latest
+            env:
+              - name: SLACK_URL
+                value: "{{ .Values.application.slack_url  }}"
+            args:
+            - send-remind
+          restartPolicy: OnFailure
+

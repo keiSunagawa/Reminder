@@ -5,8 +5,8 @@ import cats.Monad.ops._
 
 object Main extends IOApp {
   override def run(args: List[String]): IO[ExitCode] = {
-    val application = setUp(args.lift(1))
-    args.head match {
+    val application = setUp(args)
+    args.last match {
       case "send-remind" =>
         new send_reminder.App(application.remindService).exec() *>
           application.consumer.commit() *>
@@ -14,9 +14,9 @@ object Main extends IOApp {
     }
   }
 
-  def setUp(envStr: Option[String]): Application = {
+  def setUp(args: List[String]): Application = {
     val env =
-      if (envStr.contains("-prod")) AppConfig.Env.Prod
+      if (args.contains("-prod")) AppConfig.Env.Prod
       else AppConfig.Env.Local
 
     val config = AppConfig.getConfig(env)

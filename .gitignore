@@ -48,3 +48,4 @@ erl_crash.dump
 *.ez
 *.beam
 config/*.secret.exs
+*_user_values.yaml
