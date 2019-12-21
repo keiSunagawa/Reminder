@@ -3,15 +3,17 @@ package me.kerfume.reminder.batch.send_reminder
 import java.time.OffsetDateTime
 
 import cats.effect.IO
-import me.kerfume.reminder.domain.remind.RemindService
+import me.kerfume.reminder.batch.Application
+import cats.Monad.ops._
 
-class App(
-    service: RemindService[IO]
+class Executor(
+    app: Application
 ) {
   def exec(): IO[Unit] = {
     val now = OffsetDateTime.now(
       java.time.ZoneOffset.ofHours(9)
     )
-    service.remindMe(now.toLocalDateTime)
+    app.remindService.remindMe(now.toLocalDateTime) *>
+      app.consumer.commit()
   }
 }

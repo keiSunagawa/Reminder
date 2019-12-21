@@ -8,9 +8,7 @@ object Main extends IOApp {
     val application = setUp(args)
     args.last match {
       case "send-remind" =>
-        new send_reminder.App(application.remindService).exec() *>
-          application.consumer.commit() *>
-          IO(ExitCode.Success)
+        new send_reminder.Executor(application).exec() *> IO(ExitCode.Success)
     }
   }
 
