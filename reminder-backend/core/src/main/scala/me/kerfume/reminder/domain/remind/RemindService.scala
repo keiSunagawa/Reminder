@@ -50,8 +50,11 @@ class RemindService[F[_]: Monad](
   def remindMe(now: LocalDateTime): F[Unit] = {
     for {
       reminds <- repository.findByTriggerIsTime(now)
-      // TODO change status PEND?
       _ <- reminds.traverse(consumer.tell)
+      _ <- reminds.traverse { rm =>
+        val trgd = rm.triggered
+        repository.store(trgd)
+      }
     } yield ()
   }
 

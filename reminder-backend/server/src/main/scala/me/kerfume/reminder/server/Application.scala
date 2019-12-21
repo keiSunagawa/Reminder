@@ -1,18 +1,15 @@
 package me.kerfume.reminder.server
 import cats.effect.IO
 import me.kerfume.infra.impl.domain.remind.RemindRepositoryRpc
+import me.kerfume.infra.impl.domain.seqid.SeqIDRepositoryRpc
 import me.kerfume.reminder.server.controller.RegistController
 import me.kerfume.reminder.domain.remind.{Remind, RemindService}
 import me.kerfume.reminder.domain.consumer.{Consumer, ConsumerInMemory}
-import me.kerfume.reminder.domain.seqid.{
-  SeqID,
-  SeqIDRepository,
-  SeqIDRepositoryInMemory
-}
+import me.kerfume.reminder.domain.seqid.{SeqID, SeqIDRepository, SeqIDRepositoryInMemory}
 
 class Application(config: AppConfig) {
   val remindRepository = new RemindRepositoryRpc(config.rpcEndpoint)
-  val seqIDRepository = new IOWrapper.SeqIDRepositoryIOWrapper
+  val seqIDRepository = new SeqIDRepositoryRpc(remindRepository)
   val consumer = new IOWrapper.ConsumerIOWrapper
   val remindService = new RemindService(
     remindRepository,

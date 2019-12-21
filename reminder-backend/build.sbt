@@ -1,12 +1,13 @@
-ThisBuild / scalaVersion     := "2.12.8"
+ThisBuild / scalaVersion     := "2.13.1"
 ThisBuild / version          := "0.1.0-SNAPSHOT"
 ThisBuild / organization     := "com.kerfume"
 
-val catsVersion = "2.0.0"
+val catsVersion = "2.1.0"
+val catsEffectVersion = "2.0.0"
 
 val commonLibs = Seq(
     "org.typelevel" %% "cats-core" % catsVersion,
-    "org.scalatest" %% "scalatest" % "3.0.5" % Test
+    "org.scalatest" %% "scalatest" % "3.0.8" % Test
 )
 
 val monocleLib = Seq(
@@ -25,7 +26,7 @@ val baseOptions = Seq(
   "-language:higherKinds",
   "-language:postfixOps",
   "-feature",
-  "-Ypartial-unification",
+  // "-Ypartial-unification", remove by scala 2.13
   "-Xfatal-warnings",
 )
 
@@ -41,7 +42,7 @@ lazy val rpc = (project in file("./rpc")).settings(
 
   scalacOptions ++= baseOptions,
   libraryDependencies ++= commonLibs ++ Seq(
-    "org.typelevel" %% "cats-effect" % catsVersion,
+    "org.typelevel" %% "cats-effect" % catsEffectVersion,
     "com.thesamet.scalapb" %% "scalapb-runtime" % scalapb.compiler.Version.scalapbVersion % "protobuf",
     "io.grpc" % "grpc-netty" % scalapb.compiler.Version.grpcJavaVersion,
     "io.grpc" % "grpc-all" % scalapb.compiler.Version.grpcJavaVersion,
@@ -52,7 +53,7 @@ lazy val rpc = (project in file("./rpc")).settings(
 lazy val infra = (project in file("./infra")).settings(
   scalacOptions ++= baseOptions,
   libraryDependencies ++= commonLibs ++ Seq(
-    "org.typelevel" %% "cats-effect" % catsVersion
+    "org.typelevel" %% "cats-effect" % catsEffectVersion
   )
 ).dependsOn(core, rpc)
 

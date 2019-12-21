@@ -23,6 +23,7 @@ sealed trait Remind {
   def status: RemindStatus = base.status
 
   def resolve: Remind
+  def triggered: Remind
 }
 
 object Remind {
@@ -36,6 +37,7 @@ object Remind {
       with TriggerIsTime {
     def statusL: Lens[OfDate, RemindStatus] = GenLens[OfDate](_.base.status)
     def resolve: Remind = statusL.set(RemindStatus.Resolved)(this)
+    def triggered: Remind = statusL.set(RemindStatus.Unresolved)(this)
   }
 
   case class OfDateTime(
@@ -46,6 +48,7 @@ object Remind {
     def statusL: Lens[OfDateTime, RemindStatus] =
       GenLens[OfDateTime](_.base.status)
     def resolve: Remind = statusL.set(RemindStatus.Resolved)(this)
+    def triggered: Remind = statusL.set(RemindStatus.Unresolved)(this)
   }
 
   // Todo(init status) --limit over--> Unresolved ----> Resolved
