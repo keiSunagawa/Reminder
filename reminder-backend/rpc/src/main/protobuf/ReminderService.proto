@@ -4,21 +4,25 @@ package com.kerfume.remind.protos;
 
 import "google/protobuf/empty.proto";
 
-// The greeting service definition.
 service RemindListService {
   rpc Add (RemindOfDate) returns (AddResult) {}
   // 引数なし
   rpc List (google.protobuf.Empty) returns (RemindList) {}
 }
 
-// The request message containing the user's name.
+enum RemindStatus {
+  TODO = 0;
+  UNRESOLVED = 1;
+  RESOLVED = 2;
+}
+
 message RemindOfDate {
   uint64 seqNum = 1;
   string title = 2;
   string trigger = 3;
+  RemindStatus status = 4;
 }
 
-// The response message containing the greetings
 enum ActorState {
   OK = 0;
   ERROR = 1;

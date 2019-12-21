@@ -8,6 +8,10 @@ import Monad.ops._
 import cats.syntax.traverse._
 import cats.instances.list._
 import me.kerfume.reminder.domain.consumer.Consumer
+import Remind.RemindStatus
+import me.kerfume.reminder.domain.seqid.SeqID
+import cats.Applicative
+import RemindService._
 
 class RemindService[F[_]: Monad](
     repository: RemindRepository[F],
@@ -22,9 +26,7 @@ class RemindService[F[_]: Monad](
     for {
       id <- seqIDRepository.generate()
       remind = Remind.OfDate(
-        id,
-        title,
-        None,
+        RemindBase(id, title, None, RemindStatus.Todo),
         trigger
       )
       _ <- repository.store(remind)
@@ -38,9 +40,7 @@ class RemindService[F[_]: Monad](
     for {
       id <- seqIDRepository.generate()
       remind = Remind.OfDateTime(
-        id,
-        title,
-        None,
+        RemindBase(id, title, None, RemindStatus.Todo),
         trigger
       )
       _ <- repository.store(remind)
@@ -55,5 +55,23 @@ class RemindService[F[_]: Monad](
     } yield ()
   }
 
-  def list(): F[List[Remind]] = repository.findAll()
+  def resolve(id: SeqID): F[Either[ServiceError, Unit]] = {
+    for {
+      remindOps <- repository.findByID(id)
+      res <- remindOps match {
+        case Some(r) =>
+          val resolved = r.resolve
+          println(resolved)
+          repository.store(resolved).map(Right(_))
+        case None =>
+          Applicative[F].pure(Left(RemindNotFound(id)))
+      }
+    } yield res
+  }
+
+  def list(): F[List[Remind]] = repository.findByLived()
+}
+object RemindService {
+  sealed trait ServiceError
+  case class RemindNotFound(id: SeqID) extends ServiceError
 }

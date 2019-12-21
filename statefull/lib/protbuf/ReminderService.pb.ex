@@ -5,13 +5,15 @@ defmodule Com.Kerfume.Remind.Protos.RemindOfDate do
   @type t :: %__MODULE__{
           seqNum: non_neg_integer,
           title: String.t(),
-          trigger: String.t()
+          trigger: String.t(),
+          status: atom | integer
         }
-  defstruct [:seqNum, :title, :trigger]
+  defstruct [:seqNum, :title, :trigger, :status]
 
   field :seqNum, 1, type: :uint64
   field :title, 2, type: :string
   field :trigger, 3, type: :string
+  field :status, 4, type: Com.Kerfume.Remind.Protos.RemindStatus, enum: true
 end
 
 defmodule Com.Kerfume.Remind.Protos.AddResult do
@@ -36,6 +38,15 @@ defmodule Com.Kerfume.Remind.Protos.RemindList do
   defstruct [:reminds]
 
   field :reminds, 1, repeated: true, type: Com.Kerfume.Remind.Protos.RemindOfDate
+end
+
+defmodule Com.Kerfume.Remind.Protos.RemindStatus do
+  @moduledoc false
+  use Protobuf, enum: true, syntax: :proto3
+
+  field :TODO, 0
+  field :UNRESOLVED, 1
+  field :RESOLVED, 2
 end
 
 defmodule Com.Kerfume.Remind.Protos.ActorState do

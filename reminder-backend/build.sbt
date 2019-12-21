@@ -9,6 +9,16 @@ val commonLibs = Seq(
     "org.scalatest" %% "scalatest" % "3.0.5" % Test
 )
 
+val monocleLib = Seq(
+  "com.github.julien-truffaut"  %%  "monocle-core"    % "2.0.0",
+  "com.github.julien-truffaut"  %%  "monocle-generic" % "2.0.0",
+  "com.github.julien-truffaut"  %%  "monocle-macro"   % "2.0.0",
+  "com.github.julien-truffaut"  %%  "monocle-state"   % "2.0.0",
+  "com.github.julien-truffaut"  %%  "monocle-refined" % "2.0.0",
+  "com.github.julien-truffaut"  %%  "monocle-unsafe"  % "2.0.0",
+  "com.github.julien-truffaut"  %%  "monocle-law"     % "2.0.0" % "test"
+)
+
 val baseOptions = Seq(
   "-deprecation",
   "-encoding", "UTF-8",
@@ -21,7 +31,7 @@ val baseOptions = Seq(
 
 lazy val core = (project in file("./core")).settings(
   scalacOptions ++= baseOptions,
-  libraryDependencies ++= commonLibs
+  libraryDependencies ++= (commonLibs ++ monocleLib)
 )
 
 lazy val rpc = (project in file("./rpc")).settings(

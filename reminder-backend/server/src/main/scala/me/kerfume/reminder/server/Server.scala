@@ -20,6 +20,11 @@ object ReminderServer extends IOApp {
       registCtr.registByDate(p)
     }
 
+  def resolveRoute(registCtr: RegistController[IO]): HttpRoutes[IO] =
+    resolve.toRoutes { id =>
+      registCtr.resolve(id)
+    }
+
   def listRoute(registCtr: RegistController[IO]): HttpRoutes[IO] =
     list.toRoutes { _ =>
       registCtr.list()
@@ -28,7 +33,7 @@ object ReminderServer extends IOApp {
   def reminderApp(
       registCtr: RegistController[IO]
   ): HttpApp[IO] =
-    (registRoute(registCtr) <+> listRoute(registCtr)).orNotFound
+    (registRoute(registCtr) <+> listRoute(registCtr) <+> resolveRoute(registCtr)).orNotFound
 
   def run(args: List[String]): IO[ExitCode] = {
     val env =

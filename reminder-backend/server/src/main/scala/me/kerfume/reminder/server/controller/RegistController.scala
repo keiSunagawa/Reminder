@@ -5,6 +5,9 @@ import java.time.LocalDate
 import Monad.ops._
 import me.kerfume.reminder.domain.remind.Remind
 import cats.syntax.either._
+import me.kerfume.reminder.domain.seqid.SeqID
+import cats.Bifunctor.ops._
+import cats.instances.either._
 
 class RegistController[F[_]: Monad](
     service: RemindService[F]
@@ -34,11 +37,22 @@ class RegistController[F[_]: Monad](
           h1("Reminds"),
           ul(
             ofDates.map { r =>
-              li(s"${r.seqID.num} ${r.title} ${r.trigger}")
+              li(s"${r.seqID.num} ${r.title} ${r.trigger}", a(href:=s"/resolve/${r.seqID.num}")(b("resolve")))
             }: _*
           )
         )
       ).toString.asRight
+    }
+  }
+
+  def resolve(id: Long): F[Either[String, String]] = {
+    val seqID = SeqID(id)
+    service.resolve(seqID).map {
+      _.bimap({
+          case RemindService.RemindNotFound(id) => s"id: ${id.num}, not found"
+        },
+        _ => "resolve ok",
+      )
     }
   }
 }

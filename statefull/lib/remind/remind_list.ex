@@ -43,7 +43,8 @@ defmodule Remind.RemindList do
   GenServer.handle_cast/2コールバック
   """
   def handle_cast({:add, value}, state) do
-    {:noreply, [value|state]}
+    new_s = Enum.filter(state, &(&1.seqNum != value.seqNum))
+    {:noreply, [value|new_s]}
   end
 
   ### for Client

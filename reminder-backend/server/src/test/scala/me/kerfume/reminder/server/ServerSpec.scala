@@ -5,7 +5,7 @@
 // import java.time.LocalDate
 // import shapeless.ops.sized
 // import me.kerfume.reminder.domain.remind.Remind
-
+//
 // class ServerSpec extends FreeSpec with DiagrammedAssertions {
 //   import io.circe.parser
 //   import org.http4s.circe._
@@ -21,21 +21,21 @@
 //         )
 //       )
 //       .unsafeRunSync()
-
+//
 //     "should status ok" in {
 //       assert(res.status == Status.Ok)
 //     }
-
+//
 //     val resBody: String =
 //       new String(res.body.compile.toList.unsafeRunSync().toArray, "UTF-8")
-
+//
 //     "should body" in {
 //       assert(resBody == "regist ok")
 //     }
-
+//
 //     "should registed" in {
 //       val reminds = Application.remindRepository.findAll()
-
+//
 //       assert(reminds.size == 1)
 //       val actual = reminds.head.asInstanceOf[Remind.OfDate]
 //       assert(actual.title == "test task")

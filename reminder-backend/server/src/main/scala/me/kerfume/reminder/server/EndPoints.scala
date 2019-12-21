@@ -1,7 +1,7 @@
 package me.kerfume.reminder.server
 
-import cats.effect.IO
-import java.time.LocalDate
+import sttp.model.StatusCode
+
 
 object EndPoints {
   import sttp.tapir._
@@ -18,6 +18,15 @@ object EndPoints {
       .in(jsonBody[RegistByDateParam])
       .out(stringBody)
       .errorOut(stringBody)
+
+  val resolve: Endpoint[Int, ErrorMessage, String, Nothing] =
+    endpoint.get
+      .in("resolve" / path[Int]("id"))
+      .out(stringBody)
+      .errorOut {
+        // エラー型がひとつに定まっている場合でもoneOfは必要
+        oneOf(statusMapping(StatusCode.NotFound, stringBody))
+      }
 
   val list: Endpoint[Unit, Unit, String, Nothing] =
     endpoint.get

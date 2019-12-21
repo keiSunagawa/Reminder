@@ -9,6 +9,11 @@ import java.time.format.DateTimeFormatter
 import com.kerfume.remind.protos.ReminderService.RemindListServiceGrpc
 import me.kerfume.reminder.domain.seqid.SeqID
 import me.kerfume.rpc.{ClientSupport, GrpcDataType, RpcEndpoint}
+import me.kerfume.reminder.domain.remind.RemindBase
+import com.kerfume.remind.protos.ReminderService.{
+  RemindStatus => RpcRemindStatus
+}
+import me.kerfume.reminder.domain.remind.Remind.RemindStatus
 
 class RemindRepositoryRpc(
     endpoint: RpcEndpoint
@@ -23,7 +28,8 @@ class RemindRepositoryRpc(
     val data = com.kerfume.remind.protos.ReminderService.RemindOfDate(
       willStore.seqID.num,
       willStore.title,
-      fmt.format(willStore.trigger)
+      fmt.format(willStore.trigger),
+      toRpcModelStatus(remind.status)
     )
 
     rpcStub.add(data)
@@ -37,9 +43,12 @@ class RemindRepositoryRpc(
         .reminds
         .map { rorg =>
           Remind.OfDate(
-            SeqID(rorg.seqNum),
-            rorg.title,
-            None,
+            RemindBase(
+              SeqID(rorg.seqNum),
+              rorg.title,
+              None,
+              toDomeinModelStatus(rorg.status)
+            ),
             LocalDate.parse(rorg.trigger, fmt)
           )
         }
@@ -65,5 +74,18 @@ class RemindRepositoryRpc(
           r
       }: List[Remind with Remind.TriggerIsTime]
     }
+  }
+
+  private def toDomeinModelStatus: RpcRemindStatus => RemindStatus = {
+    case RpcRemindStatus.TODO       => RemindStatus.Todo
+    case RpcRemindStatus.UNRESOLVED => RemindStatus.Unresolved
+    case RpcRemindStatus.RESOLVED   => RemindStatus.Resolved
+    case RpcRemindStatus.Unrecognized(x) =>
+      throw new RuntimeException(s"invalid status: $x") // FIXME return Either[Error, ?]
+  }
+  private def toRpcModelStatus: RemindStatus => RpcRemindStatus = {
+    case RemindStatus.Todo => RpcRemindStatus.TODO
+    case RemindStatus.Unresolved => RpcRemindStatus.UNRESOLVED
+    case RemindStatus.Resolved => RpcRemindStatus.RESOLVED
   }
 }
