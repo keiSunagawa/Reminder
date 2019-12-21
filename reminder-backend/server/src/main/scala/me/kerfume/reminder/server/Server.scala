@@ -33,7 +33,9 @@ object ReminderServer extends IOApp {
   def reminderApp(
       registCtr: RegistController[IO]
   ): HttpApp[IO] =
-    (registRoute(registCtr) <+> listRoute(registCtr) <+> resolveRoute(registCtr)).orNotFound
+    (registRoute(registCtr) <+> listRoute(registCtr) <+> resolveRoute(
+      registCtr
+    )).orNotFound
 
   def run(args: List[String]): IO[ExitCode] = {
     val env =

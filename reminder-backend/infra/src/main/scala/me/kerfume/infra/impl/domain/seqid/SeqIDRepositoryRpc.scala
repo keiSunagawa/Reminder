@@ -5,7 +5,7 @@ import me.kerfume.infra.impl.domain.remind.RemindRepositoryRpc
 import me.kerfume.reminder.domain.seqid.{SeqID, SeqIDRepository}
 
 class SeqIDRepositoryRpc(
-  reminderRepository: RemindRepositoryRpc
+    reminderRepository: RemindRepositoryRpc
 ) extends SeqIDRepository[IO] {
   override def generate(): IO[SeqID] = {
     reminderRepository.findAll().map { rms =>

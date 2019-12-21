@@ -1,10 +1,11 @@
-package me.kerfume.reminder.server
+package me.kerfume.reminder.batch
+
 import cats.effect.IO
+import me.kerfume.infra.impl.domain.consumer.ConsumerSlackBulk
 import me.kerfume.infra.impl.domain.remind.RemindRepositoryRpc
 import me.kerfume.infra.impl.domain.seqid.SeqIDRepositoryRpc
-import me.kerfume.reminder.server.controller.RegistController
-import me.kerfume.reminder.domain.remind.{Remind, RemindService}
 import me.kerfume.reminder.domain.consumer.{Consumer, ConsumerInMemory}
+import me.kerfume.reminder.domain.remind.{Remind, RemindService}
 import me.kerfume.reminder.domain.seqid.{
   SeqID,
   SeqIDRepository,
@@ -14,14 +15,12 @@ import me.kerfume.reminder.domain.seqid.{
 class Application(config: AppConfig) {
   val remindRepository = new RemindRepositoryRpc(config.rpcEndpoint)
   val seqIDRepository = new SeqIDRepositoryRpc(remindRepository)
-  val consumer = new IOWrapper.ConsumerIOWrapper
+  val consumer = new ConsumerSlackBulk(config.slackConsumerConfig)
   val remindService = new RemindService(
     remindRepository,
     seqIDRepository,
     consumer
   )
-
-  val registController = new RegistController(remindService)
 }
 
 object IOWrapper {

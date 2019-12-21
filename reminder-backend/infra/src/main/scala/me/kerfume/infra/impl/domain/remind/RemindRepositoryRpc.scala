@@ -3,7 +3,7 @@ package me.kerfume.infra.impl.domain.remind
 import me.kerfume.reminder.domain.remind.RemindRepository
 import cats.effect.IO
 import me.kerfume.reminder.domain.remind.Remind
-import java.time.{LocalDate, LocalDateTime}
+import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
 import com.kerfume.remind.protos.ReminderService.RemindListServiceGrpc
@@ -35,7 +35,7 @@ class RemindRepositoryRpc(
     rpcStub.add(data)
   }
   import cats.syntax.all._
-  def findAll(): IO[List[Remind]] =
+  def findAll(): IO[List[Remind]] = {
     IO {
       println(endpoint)
       rpcStub
@@ -59,21 +59,6 @@ class RemindRepositoryRpc(
         println(e)
         IO.unit
     }
-  def findByTriggerIsTime(
-      now: LocalDateTime
-  ): IO[List[Remind with Remind.TriggerIsTime]] = {
-    findAll().map { reminds =>
-      reminds.collect {
-        case r: Remind.OfDate if {
-              val dt = r.trigger.atTime(0, 0)
-              dt.isBefore(now) || dt.isEqual(now)
-            } =>
-          r
-        case r: Remind.OfDateTime
-            if r.trigger.isBefore(now) || r.trigger.isEqual(now) =>
-          r
-      }: List[Remind with Remind.TriggerIsTime]
-    }
   }
 
   private def toDomeinModelStatus: RpcRemindStatus => RemindStatus = {
@@ -84,8 +69,8 @@ class RemindRepositoryRpc(
       throw new RuntimeException(s"invalid status: $x") // FIXME return Either[Error, ?]
   }
   private def toRpcModelStatus: RemindStatus => RpcRemindStatus = {
-    case RemindStatus.Todo => RpcRemindStatus.TODO
+    case RemindStatus.Todo       => RpcRemindStatus.TODO
     case RemindStatus.Unresolved => RpcRemindStatus.UNRESOLVED
-    case RemindStatus.Resolved => RpcRemindStatus.RESOLVED
+    case RemindStatus.Resolved   => RpcRemindStatus.RESOLVED
   }
 }

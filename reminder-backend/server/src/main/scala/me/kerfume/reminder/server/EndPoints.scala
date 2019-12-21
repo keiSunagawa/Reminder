@@ -2,7 +2,6 @@ package me.kerfume.reminder.server
 
 import sttp.model.StatusCode
 
-
 object EndPoints {
   import sttp.tapir._
   import sttp.tapir.json.circe._

@@ -37,7 +37,10 @@ class RegistController[F[_]: Monad](
           h1("Reminds"),
           ul(
             ofDates.map { r =>
-              li(s"${r.seqID.num} ${r.title} ${r.trigger}", a(href:=s"/resolve/${r.seqID.num}")(b("resolve")))
+              li(
+                s"${r.seqID.num} ${r.title} ${r.trigger}",
+                a(href := s"/resolve/${r.seqID.num}")(b("resolve"))
+              )
             }: _*
           )
         )
@@ -49,10 +52,8 @@ class RegistController[F[_]: Monad](
     val seqID = SeqID(id)
     service.resolve(seqID).map {
       _.bimap({
-          case RemindService.RemindNotFound(id) => s"id: ${id.num}, not found"
-        },
-        _ => "resolve ok",
-      )
+        case RemindService.RemindNotFound(id) => s"id: ${id.num}, not found"
+      }, _ => "resolve ok")
     }
   }
 }
