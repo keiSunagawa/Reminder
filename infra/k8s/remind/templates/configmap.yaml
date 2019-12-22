@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "remind.config.name" . }}
+  labels:
+{{ include "remind.labels" . | indent 4 }}
+data:
+  nginx-default.conf: |
+{{- tpl (.Files.Get "files/nginx-default.conf") . | nindent 4 }}
+  nginx-certificate.pem: |
+{{- .Values.application.nginx.certificate | nindent 4 }}
+  nginx-certificate.key: |
+{{- .Values.application.nginx.certificateKey | nindent 4 }}

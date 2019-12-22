@@ -51,3 +51,11 @@ app.kubernetes.io/managed-by: {{ .Release.Service }}
 {{- define "remind.statefull_server.name" -}}
 "reminder-statefull-server"
 {{- end -}}
+
+{{- define "remind.nginx.name" -}}
+"reminder-nginx"
+{{- end -}}
+
+{{- define "remind.config.name" -}}
+"reminder-config"
+{{- end -}}

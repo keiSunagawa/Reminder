@@ -1,0 +1,46 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ include "remind.nginx.name" . }}
+  labels:
+{{ include "remind.labels" . | indent 4 }}
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "remind.nginx.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "remind.nginx.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+    spec:
+      containers:
+        - name: "nginx-cnt"
+          image: "nginx:latest"
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: https
+              containerPort: 443
+              protocol: TCP
+          volumeMounts:
+            - mountPath: /etc/nginx/conf.d
+              name: config-vol
+            - mountPath: /etc/nginx/ssl/
+              name: ssl-vol
+      volumes:
+        - name: config-vol
+          configMap:
+            name: {{ include "remind.config.name" . }}
+            items:
+              - key: "nginx-default.conf"
+                path: "default.conf"
+        - name: ssl-vol
+          configMap:
+            name: {{ include "remind.config.name" . }}
+            items:
+              - key: "nginx-certificate.pem"
+                path: "nginx.pem"
+              - key: "nginx-certificate.key"
+                path: "nginx.key"
