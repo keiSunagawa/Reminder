@@ -13,9 +13,7 @@ class ConsumerSlackBulk(
 ) extends Consumer[IO] {
   var buffer: List[Remind] = Nil
   override def tell(remind: Remind): IO[Unit] = IO {
-    println("tell me!")
     buffer = remind :: buffer
-    println(buffer)
   }
 
   def commit(): IO[Unit] = IO.suspend {

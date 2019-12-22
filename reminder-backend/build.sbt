@@ -20,6 +20,14 @@ val monocleLib = Seq(
   "com.github.julien-truffaut"  %%  "monocle-law"     % "2.0.0" % "test"
 )
 
+val circeVersion = "0.12.3"
+val circeLib = Seq(
+  "io.circe" %% "circe-core" % circeVersion,
+  "io.circe" %% "circe-generic" % circeVersion,
+  "io.circe" %% "circe-generic-extras" % "0.12.2",
+  "io.circe" %% "circe-parser" % circeVersion
+)
+
 val baseOptions = Seq(
   "-deprecation",
   "-encoding", "UTF-8",
@@ -52,12 +60,19 @@ lazy val rpc = (project in file("./rpc")).settings(baseSettings).settings(
   )
 )
 
+lazy val twitter = (project in file("./twitter")).settings(baseSettings).settings(
+  libraryDependencies ++= (Seq(
+    "org.typelevel" %% "cats-effect" % catsEffectVersion,
+    "com.softwaremill.sttp.client" %% "core" % "2.0.0-RC5",
+  ) ++ circeLib)
+).dependsOn(core)
+
 lazy val infra = (project in file("./infra")).settings(baseSettings).settings(
   libraryDependencies ++= Seq(
     "org.typelevel" %% "cats-effect" % catsEffectVersion,
     "com.softwaremill.sttp.client" %% "core" % "2.0.0-RC5",
   )
-).dependsOn(core, rpc)
+).dependsOn(core, rpc, twitter)
 
 def dockerSettings = Seq(
   dockerfile in docker := {
@@ -97,9 +112,8 @@ lazy val `reminder-server` = (project in file("./server"))
       "com.softwaremill.sttp.tapir" %% "tapir-core" % "0.12.7",
       "com.softwaremill.sttp.tapir" %% "tapir-http4s-server" % "0.12.7",
       "com.softwaremill.sttp.tapir" %% "tapir-json-circe" % "0.12.7",
-      "io.circe" %% "circe-generic" % "v0.12.3",
-      "io.circe" %% "circe-generic" % "v0.12.3",
-      "io.circe" %% "circe-parser" % "v0.12.3",
+      "io.circe" %% "circe-generic" % "0.12.3",
+      "io.circe" %% "circe-parser" % "0.12.3",
       "org.http4s" %% "http4s-circe" % "0.21.0-M5",
       "com.lihaoyi" %% "scalatags" % "0.7.0"
     ),
@@ -120,5 +134,6 @@ lazy val root = (project in file(".")).aggregate(
   infra,
   `reminder-server`,
   `reminder-batch`,
-  rpc
+  rpc,
+  twitter
 )

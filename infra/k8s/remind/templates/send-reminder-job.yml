@@ -3,7 +3,8 @@ kind: CronJob
 metadata:
   name: "reminder-batch-send-reminder"
 spec:
-  schedule: "30 10 * * *"
+  # setting UTC
+  schedule: "30 1 * * *"
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
