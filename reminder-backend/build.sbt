@@ -4,9 +4,11 @@ ThisBuild / organization     := "com.kerfume"
 
 val catsVersion = "2.1.0"
 val catsEffectVersion = "2.0.0"
+resolvers in ThisBuild += "kerfume repo" at "https://keisunagawa.github.io/kerfume-scala-util/repo/"
 
 val commonLibs = Seq(
     "org.typelevel" %% "cats-core" % catsVersion,
+    "me.kerfume" %% "kerfume-scala-util-core" % "0.1.0",
     "org.scalatest" %% "scalatest" % "3.0.8" % Test
 )
 

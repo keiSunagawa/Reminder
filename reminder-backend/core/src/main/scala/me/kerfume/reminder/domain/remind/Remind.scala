@@ -2,8 +2,9 @@ package me.kerfume.reminder.domain.remind
 
 import java.time.LocalDateTime
 import java.time.LocalDate
+
 import me.kerfume.reminder.domain.seqid.SeqID
-import Remind.RemindStatus
+import Remind.{RemindStatus, RemindUpdateBase}
 import monocle.Lens
 import monocle.macros.GenLens
 
@@ -14,7 +15,7 @@ case class RemindBase(
     status: RemindStatus
 )
 
-sealed trait Remind {
+sealed trait Remind extends RemindUpdateBase[Remind] {
   val base: RemindBase
 
   def seqID: SeqID = base.seqID
@@ -22,11 +23,19 @@ sealed trait Remind {
   def content: Option[String] = base.content
   def status: RemindStatus = base.status
 
-  def resolve: Remind
-  def triggered: Remind
+  def resolve: Remind = updateBase(
+    base.copy(status = RemindStatus.Resolved)
+  )
+  def triggered: Remind = updateBase(
+    base.copy(status = RemindStatus.Unresolved)
+  )
 }
 
 object Remind {
+  sealed trait RemindUpdateBase[+Repr] {
+    def updateBase(newBase: RemindBase): Repr
+  }
+
   sealed trait TriggerIsTime { self: TriggerIsTime =>
   }
 
@@ -34,21 +43,21 @@ object Remind {
       base: RemindBase,
       trigger: LocalDate
   ) extends Remind
+      with RemindUpdateBase[OfDate]
       with TriggerIsTime {
-    def statusL: Lens[OfDate, RemindStatus] = GenLens[OfDate](_.base.status)
-    def resolve: Remind = statusL.set(RemindStatus.Resolved)(this)
-    def triggered: Remind = statusL.set(RemindStatus.Unresolved)(this)
+    override def updateBase(newBase: RemindBase): OfDate = copy(base = newBase)
   }
 
   case class OfDateTime(
       base: RemindBase,
       trigger: LocalDateTime
   ) extends Remind
+      with RemindUpdateBase[OfDateTime]
       with TriggerIsTime {
+    override def updateBase(newBase: RemindBase): OfDateTime =
+      copy(base = newBase)
     def statusL: Lens[OfDateTime, RemindStatus] =
       GenLens[OfDateTime](_.base.status)
-    def resolve: Remind = statusL.set(RemindStatus.Resolved)(this)
-    def triggered: Remind = statusL.set(RemindStatus.Unresolved)(this)
   }
 
   // Todo(init status) --limit over--> Unresolved ----> Resolved

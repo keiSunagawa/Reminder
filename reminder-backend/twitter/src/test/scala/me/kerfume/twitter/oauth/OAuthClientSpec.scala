@@ -15,7 +15,7 @@ class OAuthClientSpec extends path.FreeSpec {
   )
   val testSkip = true
 
-  if (!testSkip){
+  if (!testSkip) {
     "getAccessToken" - {
       //"can get request token" - {
       import sttp.client.quick._
