@@ -4,9 +4,7 @@ import java.time.LocalDateTime
 import java.time.LocalDate
 
 import me.kerfume.reminder.domain.seqid.SeqID
-import Remind.{RemindStatus, RemindUpdateBase}
-import monocle.Lens
-import monocle.macros.GenLens
+import Remind.{RemindStatus, HasBase}
 
 case class RemindBase(
     seqID: SeqID,
@@ -15,14 +13,7 @@ case class RemindBase(
     status: RemindStatus
 )
 
-sealed trait Remind extends RemindUpdateBase[Remind] {
-  val base: RemindBase
-
-  def seqID: SeqID = base.seqID
-  def title: String = base.title
-  def content: Option[String] = base.content
-  def status: RemindStatus = base.status
-
+sealed trait Remind extends HasBase[Remind] {
   def resolve: Remind = updateBase(
     base.copy(status = RemindStatus.Resolved)
   )
@@ -32,8 +23,16 @@ sealed trait Remind extends RemindUpdateBase[Remind] {
 }
 
 object Remind {
-  sealed trait RemindUpdateBase[+Repr] {
+  private[remind] trait HasBase[+Repr] {
+    val base: RemindBase
+
     def updateBase(newBase: RemindBase): Repr
+
+    def seqID: SeqID = base.seqID
+    def title: String = base.title
+    def content: Option[String] = base.content
+    def status: RemindStatus = base.status
+
   }
 
   sealed trait TriggerIsTime { self: TriggerIsTime =>
@@ -43,7 +42,7 @@ object Remind {
       base: RemindBase,
       trigger: LocalDate
   ) extends Remind
-      with RemindUpdateBase[OfDate]
+      with HasBase[OfDate]
       with TriggerIsTime {
     override def updateBase(newBase: RemindBase): OfDate = copy(base = newBase)
   }
@@ -52,12 +51,10 @@ object Remind {
       base: RemindBase,
       trigger: LocalDateTime
   ) extends Remind
-      with RemindUpdateBase[OfDateTime]
+      with HasBase[OfDateTime]
       with TriggerIsTime {
     override def updateBase(newBase: RemindBase): OfDateTime =
       copy(base = newBase)
-    def statusL: Lens[OfDateTime, RemindStatus] =
-      GenLens[OfDateTime](_.base.status)
   }
 
   // Todo(init status) --limit over--> Unresolved ----> Resolved
