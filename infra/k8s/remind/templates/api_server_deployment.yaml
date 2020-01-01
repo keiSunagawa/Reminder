@@ -22,8 +22,14 @@ spec:
     {{- end }}
       containers:
         - name: "reminder-server"
-          image: "keisunagawa/reminder-server:latest"
+          image: "keisunagawa/reminder-server:test-impl-auth"
+          #image: "keisunagawa/reminder-server:latest"
           imagePullPolicy: Always
+          env:
+            - name: TWITTER_CONSUMER_KEY
+              value: "{{ .Values.application.twitter.key  }}"
+            - name: TWITTER_CONSUMER_SECRET
+              value: "{{ .Values.application.twitter.secret  }}"
           ports:
             - name: http
               containerPort: 8080

@@ -39,7 +39,7 @@ object EndPoints {
       .out(htmlBodyUtf8)
       .errorOut(ErrorInfo.errorInfoOutput)
 
-  val twitterAuth: Endpoint[(String, String), ErrorInfo, Unit, Nothing] =
+  val twitterAuth: Endpoint[(String, String), ErrorInfo, String, Nothing] =
     endpoint.get
       .in("auth")
       .in(query[String]("oauth_token"))
@@ -48,9 +48,10 @@ object EndPoints {
         oneOf(
           statusMapping(
             StatusCode.TemporaryRedirect,
+            //stringBody
             header("Cache-Control", "no-cache") and
               header("Location", "https://reminder.kerfume.me:30080/list") and
-              emptyOutput
+              header[String]("Set-Cookie")
           )
         )
       )

@@ -48,7 +48,13 @@ object ReminderServer extends IOApp {
   ): HttpRoutes[IO] =
     twitterAuth.toRoutes {
       case (key, verify) =>
-        aCtr.authentication(key, verify)
+        import cats.syntax.applicativeError._
+        println(verify)
+        aCtr.authentication(key, verify).onError { e =>
+          println(e.getMessage)
+          e.printStackTrace()
+          IO.unit
+        }
     }
 
   def reminderApp(

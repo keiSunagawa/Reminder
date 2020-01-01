@@ -37,7 +37,7 @@ class AuthenticationService(
   def createSession(
       tokenKey: String,
       verifier: String
-  ): IO[Either[String, Unit]] = {
+  ): IO[Either[String, String]] = {
     for {
       token <- sessions.getPreSession(tokenKey)
       res <- token match {
@@ -45,8 +45,8 @@ class AuthenticationService(
           for {
             accessToken <- twitterOAuthClient.getAccessToken(t, verifier)
             profile <- twitterOAuthClient.getProfile(accessToken)
-            _ <- sessions.setSession(profile.id.toString, accessToken)
-          } yield Right(())
+            key <- sessions.setSession(profile.id.toString, accessToken)
+          } yield Right(s"REMINDER_SESSION=$key")
         case None => IO { Left("token not found.") }
       }
     } yield res

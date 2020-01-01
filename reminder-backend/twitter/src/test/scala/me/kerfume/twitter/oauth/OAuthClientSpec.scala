@@ -2,9 +2,9 @@ package me.kerfume.twitter.oauth
 
 import me.kerfume.random.RandomProviderDefault
 import me.kerfume.time.TimeProviderDefault
-import org.scalatest.path
+import org.scalatest.freespec.AnyFreeSpec
 
-class OAuthClientSpec extends path.FreeSpec {
+class OAuthClientSpec extends AnyFreeSpec {
   val client = new OAuthClient(
     OAuthClient.Config(
       consumerKey = "",

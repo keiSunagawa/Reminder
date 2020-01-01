@@ -26,7 +26,10 @@ class TwitterOAuthSessions(
       }
     }
   }
-  def setSession(twitterAccountId: String, oAuthToken: OAuthToken): IO[Unit] =
+  def setSession(
+      twitterAccountId: String,
+      oAuthToken: OAuthToken
+  ): IO[SessionKey] =
     genKey().map { key =>
       val session = Session(
         key,
@@ -35,6 +38,7 @@ class TwitterOAuthSessions(
         oAuthToken
       )
       sessions = sessions + (session.sessionKey -> session)
+      session.sessionKey
     }
   def setPreSession(preSession: OAuthToken): IO[Unit] = IO {
     preSessions = preSessions + (preSession.token -> preSession)

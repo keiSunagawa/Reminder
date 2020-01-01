@@ -32,7 +32,7 @@ class AuthenticationController(
   def authentication(
       tokenKey: String,
       verifier: String
-  ): IO[Either[ErrorInfo, Unit]] =
+  ): IO[Either[ErrorInfo, String]] =
     service.createSession(tokenKey, verifier).map {
       _.left.map(ErrorInfo.BadRequest(_))
     }
