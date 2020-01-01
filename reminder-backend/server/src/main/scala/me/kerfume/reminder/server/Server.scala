@@ -5,8 +5,17 @@ import cats.effect.{ExitCode, IO}
 import org.http4s.HttpRoutes
 import org.http4s.HttpApp
 import cats.SemigroupK.ops._
+import me.kerfume.infra.impl.session.AuthenticationService
+import me.kerfume.infra.impl.session.AuthenticationService.{
+  NeedGetTwitterOAuthToken,
+  SessionExists
+}
 import org.http4s.implicits._
-import me.kerfume.reminder.server.controller.RegistController
+import me.kerfume.reminder.server.controller.{
+  AuthenticationController,
+  RegistController
+}
+import me.kerfume.reminder.server.controller.RegistController.RedirectFor
 
 object ReminderServer extends IOApp {
   import sttp.tapir._
@@ -25,15 +34,21 @@ object ReminderServer extends IOApp {
       registCtr.resolve(id)
     }
 
-  def listRoute(registCtr: RegistController[IO]): HttpRoutes[IO] =
-    list.toRoutes { _ =>
-      registCtr.list()
+  def listRoute(
+      registCtr: RegistController[IO],
+      aCtr: AuthenticationController
+  ): HttpRoutes[IO] =
+    list.toRoutes { s =>
+      aCtr.withAuthentication(s.sessionKey) {
+        registCtr.list().map(Right(_))
+      }
     }
 
   def reminderApp(
-      registCtr: RegistController[IO]
+      registCtr: RegistController[IO],
+      aCtr: AuthenticationController
   ): HttpApp[IO] =
-    (registRoute(registCtr) <+> listRoute(registCtr) <+> resolveRoute(
+    (registRoute(registCtr) <+> listRoute(registCtr, aCtr) <+> resolveRoute(
       registCtr
     )).orNotFound
 
@@ -49,7 +64,9 @@ object ReminderServer extends IOApp {
 
     BlazeServerBuilder[IO]
       .bindHttp(8080, "0.0.0.0")
-      .withHttpApp(reminderApp(app.registController))
+      .withHttpApp(
+        reminderApp(app.registController, app.authenticationController)
+      )
       .serve
       .compile
       .drain

@@ -2,7 +2,15 @@ package me.kerfume.reminder.server
 import cats.effect.IO
 import me.kerfume.infra.impl.domain.remind.RemindRepositoryRpc
 import me.kerfume.infra.impl.domain.seqid.SeqIDRepositoryRpc
-import me.kerfume.reminder.server.controller.RegistController
+import me.kerfume.infra.impl.session.{
+  AuthenticationService,
+  TwitterOAuthSessions
+}
+import me.kerfume.random.RandomProviderDefault
+import me.kerfume.reminder.server.controller.{
+  AuthenticationController,
+  RegistController
+}
 import me.kerfume.reminder.domain.remind.{Remind, RemindService}
 import me.kerfume.reminder.domain.consumer.{Consumer, ConsumerInMemory}
 import me.kerfume.reminder.domain.seqid.{
@@ -10,6 +18,8 @@ import me.kerfume.reminder.domain.seqid.{
   SeqIDRepository,
   SeqIDRepositoryInMemory
 }
+import me.kerfume.time.TimeProviderDefault
+import me.kerfume.twitter.oauth.OAuthClient
 
 class Application(config: AppConfig) {
   val remindRepository = new RemindRepositoryRpc(config.rpcEndpoint)
@@ -22,6 +32,21 @@ class Application(config: AppConfig) {
   )
 
   val registController = new RegistController(remindService)
+
+  val sessions = new TwitterOAuthSessions
+  val oAuthClient = new OAuthClient(
+    config.twitterKeys,
+    RandomProviderDefault,
+    TimeProviderDefault
+  )
+  val authenticationService = new AuthenticationService(
+    sessions,
+    oAuthClient
+  )
+
+  val authenticationController = new AuthenticationController(
+    authenticationService
+  )
 }
 
 object IOWrapper {

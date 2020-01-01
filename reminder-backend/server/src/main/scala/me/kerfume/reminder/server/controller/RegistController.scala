@@ -1,13 +1,15 @@
 package me.kerfume.reminder.server.controller
 import me.kerfume.reminder.domain.remind.RemindService
-import cats.Monad
+import cats.{Applicative, Monad}
 import java.time.LocalDate
+
 import Monad.ops._
 import me.kerfume.reminder.domain.remind.Remind
 import cats.syntax.either._
 import me.kerfume.reminder.domain.seqid.SeqID
 import cats.Bifunctor.ops._
 import cats.instances.either._
+import sttp.model.Uri
 
 class RegistController[F[_]: Monad](
     service: RemindService[F]
@@ -24,7 +26,7 @@ class RegistController[F[_]: Monad](
         Right("regist ok")
       }
 
-  def list(): F[Either[Unit, String]] = {
+  def list(): F[String] = {
     import scalatags.Text.all._
     service.list().map { xs =>
       val ofDates = xs.collect {
@@ -44,7 +46,7 @@ class RegistController[F[_]: Monad](
             }: _*
           )
         )
-      ).toString.asRight
+      ).toString
     }
   }
 
@@ -60,4 +62,7 @@ class RegistController[F[_]: Monad](
 
 object RegistController {
   case class RegistByDateParam(title: String, trigger: LocalDate)
+  case class WithSessionKey[A](sessionKey: Option[String], params: A)
+
+  case class RedirectFor(uri: Uri)
 }

@@ -1,9 +1,11 @@
 package me.kerfume.reminder.server
 
 import me.kerfume.rpc.RpcEndpoint
+import me.kerfume.twitter.oauth.OAuthClient
 
 trait AppConfig {
   def rpcEndpoint: RpcEndpoint
+  def twitterKeys: OAuthClient.Config
 }
 
 abstract class TypeSafeAppConfig extends AppConfig {
@@ -16,6 +18,10 @@ abstract class TypeSafeAppConfig extends AppConfig {
       config.getString("rpc.host"),
       config.getInt("rpc.port")
     )
+  lazy val twitterKeys = OAuthClient.Config(
+    config.getString("twitter.consumerKey"),
+    config.getString("twitter.consumerSecret")
+  )
 }
 
 class ProdAppConfig extends TypeSafeAppConfig {

@@ -1,6 +1,6 @@
 package me.kerfume.reminder.server
 
-import sttp.model.StatusCode
+import sttp.model.{StatusCode, Uri}
 
 object EndPoints {
   import sttp.tapir._
@@ -10,6 +10,7 @@ object EndPoints {
   import controller.RegistController._
 
   type ErrorMessage = String
+  private val sessionCookie = "REMINDER_SESSION"
 
   val regist: Endpoint[RegistByDateParam, ErrorMessage, String, Nothing] =
     endpoint.post
@@ -24,11 +25,24 @@ object EndPoints {
       .out(stringBody)
       .errorOut {
         // エラー型がひとつに定まっている場合でもoneOfは必要
+        // TODO ErrorInfoで実装
         oneOf(statusMapping(StatusCode.NotFound, stringBody))
       }
 
-  val list: Endpoint[Unit, Unit, String, Nothing] =
+  implicit val c: CodecForMany.PlainCodecForMany[RedirectFor] = {
+    CodecForMany.fromCodec[RedirectFor, CodecFormat.TextPlain, String](
+      Codec.stringPlainCodecUtf8.map(
+        s => RedirectFor(Uri.parse(s).toOption.get)
+      )(_.uri.toString)
+    )
+  }
+  val list: Endpoint[WithSessionKey[Unit], ErrorInfo, String, Nothing] =
     endpoint.get
       .in("list")
+      .in(
+        cookie[Option[String]](sessionCookie)
+          .map(WithSessionKey(_, ()))(_.sessionKey)
+      )
       .out(htmlBodyUtf8)
+      .errorOut(ErrorInfo.errorInfoOutput)
 }
