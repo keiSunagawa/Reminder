@@ -33,6 +33,24 @@ class AuthenticationService(
       }
     } yield res
   }
+
+  def createSession(
+      tokenKey: String,
+      verifier: String
+  ): IO[Either[String, Unit]] = {
+    for {
+      token <- sessions.getPreSession(tokenKey)
+      res <- token match {
+        case Some(t) =>
+          for {
+            accessToken <- twitterOAuthClient.getAccessToken(t, verifier)
+            profile <- twitterOAuthClient.getProfile(accessToken)
+            _ <- sessions.setSession(profile.id.toString, accessToken)
+          } yield Right(())
+        case None => IO { Left("token not found.") }
+      }
+    } yield res
+  }
 }
 
 object AuthenticationService {

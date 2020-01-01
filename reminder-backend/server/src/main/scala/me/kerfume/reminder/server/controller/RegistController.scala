@@ -63,6 +63,4 @@ class RegistController[F[_]: Monad](
 object RegistController {
   case class RegistByDateParam(title: String, trigger: LocalDate)
   case class WithSessionKey[A](sessionKey: Option[String], params: A)
-
-  case class RedirectFor(uri: Uri)
 }

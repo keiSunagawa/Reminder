@@ -33,7 +33,8 @@ class Application(config: AppConfig) {
 
   val registController = new RegistController(remindService)
 
-  val sessions = new TwitterOAuthSessions
+  val sessions =
+    new TwitterOAuthSessions(TimeProviderDefault, RandomProviderDefault)
   val oAuthClient = new OAuthClient(
     config.twitterKeys,
     RandomProviderDefault,

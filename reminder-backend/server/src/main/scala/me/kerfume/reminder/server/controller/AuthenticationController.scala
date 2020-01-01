@@ -13,13 +13,13 @@ class AuthenticationController(
 ) {
   import sttp.model.Uri._
 
-  def withAuthentication[A](
+  def withCheckAuthentication[A](
       sessionKey: Option[String]
   )(f: => IO[Either[ErrorInfo, A]]): IO[Either[ErrorInfo, A]] = {
     for {
       ares <- service.twitterAuthenticationInit(
         sessionKey,
-        uri"https://reminder.kerfume.me:30080/list" // TODO input from application
+        uri"https://reminder.kerfume.me:30080/auth" // TODO input from application
       )
       res <- ares match {
         case SessionExists(_) => f
@@ -28,4 +28,12 @@ class AuthenticationController(
       }
     } yield res
   }
+
+  def authentication(
+      tokenKey: String,
+      verifier: String
+  ): IO[Either[ErrorInfo, Unit]] =
+    service.createSession(tokenKey, verifier).map {
+      _.left.map(ErrorInfo.BadRequest(_))
+    }
 }

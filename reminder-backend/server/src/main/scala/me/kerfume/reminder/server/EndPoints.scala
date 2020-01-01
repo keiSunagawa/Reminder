@@ -1,6 +1,6 @@
 package me.kerfume.reminder.server
 
-import sttp.model.{StatusCode, Uri}
+import sttp.model.StatusCode
 
 object EndPoints {
   import sttp.tapir._
@@ -29,13 +29,6 @@ object EndPoints {
         oneOf(statusMapping(StatusCode.NotFound, stringBody))
       }
 
-  implicit val c: CodecForMany.PlainCodecForMany[RedirectFor] = {
-    CodecForMany.fromCodec[RedirectFor, CodecFormat.TextPlain, String](
-      Codec.stringPlainCodecUtf8.map(
-        s => RedirectFor(Uri.parse(s).toOption.get)
-      )(_.uri.toString)
-    )
-  }
   val list: Endpoint[WithSessionKey[Unit], ErrorInfo, String, Nothing] =
     endpoint.get
       .in("list")
@@ -44,5 +37,22 @@ object EndPoints {
           .map(WithSessionKey(_, ()))(_.sessionKey)
       )
       .out(htmlBodyUtf8)
+      .errorOut(ErrorInfo.errorInfoOutput)
+
+  val twitterAuth: Endpoint[(String, String), ErrorInfo, Unit, Nothing] =
+    endpoint.get
+      .in("auth")
+      .in(query[String]("oauth_token"))
+      .in(query[String]("oauth_verifier"))
+      .out(
+        oneOf(
+          statusMapping(
+            StatusCode.TemporaryRedirect,
+            header("Cache-Control", "no-cache") and
+              header("Location", "https://reminder.kerfume.me:30080/list") and
+              emptyOutput
+          )
+        )
+      )
       .errorOut(ErrorInfo.errorInfoOutput)
 }

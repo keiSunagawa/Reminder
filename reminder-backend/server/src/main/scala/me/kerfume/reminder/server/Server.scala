@@ -15,7 +15,6 @@ import me.kerfume.reminder.server.controller.{
   AuthenticationController,
   RegistController
 }
-import me.kerfume.reminder.server.controller.RegistController.RedirectFor
 
 object ReminderServer extends IOApp {
   import sttp.tapir._
@@ -39,9 +38,17 @@ object ReminderServer extends IOApp {
       aCtr: AuthenticationController
   ): HttpRoutes[IO] =
     list.toRoutes { s =>
-      aCtr.withAuthentication(s.sessionKey) {
+      aCtr.withCheckAuthentication(s.sessionKey) {
         registCtr.list().map(Right(_))
       }
+    }
+
+  def authRoute(
+      aCtr: AuthenticationController
+  ): HttpRoutes[IO] =
+    twitterAuth.toRoutes {
+      case (key, verify) =>
+        aCtr.authentication(key, verify)
     }
 
   def reminderApp(
@@ -50,7 +57,7 @@ object ReminderServer extends IOApp {
   ): HttpApp[IO] =
     (registRoute(registCtr) <+> listRoute(registCtr, aCtr) <+> resolveRoute(
       registCtr
-    )).orNotFound
+    ) <+> authRoute(aCtr)).orNotFound
 
   def run(args: List[String]): IO[ExitCode] = {
     val env =
