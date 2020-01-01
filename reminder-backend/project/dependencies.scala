@@ -13,6 +13,7 @@ object Versions {
   val scalaTag = "0.7.0"
   val typesafeConfig = "1.4.0"
   val scalaTest = "3.0.8"
+  val logback = "1.2.3"
 }
 object Dependencies {
   val cats = Seq("org.typelevel" %% "cats-core" % Versions.cats)
@@ -62,5 +63,8 @@ object Dependencies {
   )
   val scalaTest = Seq(
     "org.scalatest" %% "scalatest" % Versions.scalaTest % Test
+  )
+  val logback = Seq(
+    "ch.qos.logback" % "logback-classic" % Versions.logback
   )
 }
