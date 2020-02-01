@@ -1,0 +1,30 @@
+{
+  "name": "reminder-frontend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "clean": "rimraf static/dist",
+    "build": "npm run clean && webpack --config ./webpack.config.js --progress --profile --colors",
+    "watch": "npm run clean && webpack-dev-server --content-base static/ --hot --inline --config webpack.config.js",
+    "serve": "npm run build && serve -s static",
+    "start": "npm run watch",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "purs-loader": "^3.7.1",
+    "rimraf": "^3.0.1",
+    "serve": "^11.3.0",
+    "webpack": "^4.41.5",
+    "webpack-dev-server": "^3.10.2",
+    "webpack-node-externals": "^1.5.4"
+  },
+  "dependencies": {
+    "webpack-cli": "^3.3.10"
+  }
+}
