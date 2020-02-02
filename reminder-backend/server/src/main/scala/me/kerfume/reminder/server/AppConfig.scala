@@ -1,9 +1,12 @@
 package me.kerfume.reminder.server
 
+import me.kerfume.reminder.server.AppConfig.Env
 import me.kerfume.rpc.RpcEndpoint
 
 trait AppConfig {
+  def env: Env
   def rpcEndpoint: RpcEndpoint
+  def launchPort: Int
 }
 
 abstract class TypeSafeAppConfig extends AppConfig {
@@ -19,11 +22,15 @@ abstract class TypeSafeAppConfig extends AppConfig {
 }
 
 class ProdAppConfig extends TypeSafeAppConfig {
-  lazy val configFileEnv = "prod"
+  val env: Env = Env.Prod
+  val configFileEnv = "prod"
+  val launchPort: Int = 8080
 }
 
 class LocalAppConfig extends TypeSafeAppConfig {
-  lazy val configFileEnv = "local"
+  val env: Env = Env.Local
+  val configFileEnv = "local"
+  val launchPort: Int = 9999
 }
 
 object AppConfig {

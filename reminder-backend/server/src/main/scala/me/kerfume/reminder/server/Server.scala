@@ -7,6 +7,7 @@ import org.http4s.HttpApp
 import cats.SemigroupK.ops._
 import org.http4s.implicits._
 import me.kerfume.reminder.server.controller.RegistController
+import org.http4s.server.middleware.{CORS, CORSConfig}
 
 object ReminderServer extends IOApp {
   import sttp.tapir._
@@ -47,9 +48,17 @@ object ReminderServer extends IOApp {
 
     val app = new Application(config)
 
+    import scala.concurrent.duration._
+    val originConfig = CORSConfig(
+      anyOrigin = true,
+      allowCredentials = true,
+      maxAge = 1.day.toSeconds
+    )
+    // With Middlewares in place
+    val finalHttpApp = CORS(reminderApp(app.registController), originConfig)
     BlazeServerBuilder[IO]
-      .bindHttp(8080, "0.0.0.0")
-      .withHttpApp(reminderApp(app.registController))
+      .bindHttp(config.launchPort, "0.0.0.0")
+      .withHttpApp(finalHttpApp)
       .serve
       .compile
       .drain

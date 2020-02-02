@@ -25,6 +25,7 @@
     "webpack-node-externals": "^1.5.4"
   },
   "dependencies": {
-    "webpack-cli": "^3.3.10"
+    "webpack-cli": "^3.3.10",
+    "xhr2": "^0.2.0"
   }
 }

@@ -1,5 +1,6 @@
 package me.kerfume.reminder.server
 
+import me.kerfume.reminder.domain.remind.Remind
 import sttp.model.StatusCode
 
 object EndPoints {
@@ -27,8 +28,8 @@ object EndPoints {
         oneOf(statusMapping(StatusCode.NotFound, stringBody))
       }
 
-  val list: Endpoint[Unit, Unit, String, Nothing] =
+  val list: Endpoint[Unit, Unit, ListResponse, Nothing] =
     endpoint.get
       .in("list")
-      .out(htmlBodyUtf8)
+      .out(jsonBody[ListResponse])
 }
