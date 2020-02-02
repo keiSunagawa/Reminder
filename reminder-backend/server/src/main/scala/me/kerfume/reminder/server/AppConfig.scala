@@ -1,11 +1,15 @@
 package me.kerfume.reminder.server
 
+import me.kerfume.reminder.server.AppConfig.Env
 import me.kerfume.rpc.RpcEndpoint
 import me.kerfume.twitter.oauth.OAuthClient
 
 trait AppConfig {
+  def env: Env
   def rpcEndpoint: RpcEndpoint
   def twitterKeys: OAuthClient.Config
+  def launchPort: Int
+  def origin: String
 }
 
 abstract class TypeSafeAppConfig extends AppConfig {
@@ -25,11 +29,17 @@ abstract class TypeSafeAppConfig extends AppConfig {
 }
 
 class ProdAppConfig extends TypeSafeAppConfig {
-  lazy val configFileEnv = "prod"
+  val env = Env.Prod
+  val configFileEnv = "prod"
+  val launchPort = 8080
+  val origin = "https://reminder.kerfume.me:30080"
 }
 
 class LocalAppConfig extends TypeSafeAppConfig {
-  lazy val configFileEnv = "local"
+  val env: Env = Env.Local
+  val configFileEnv = "local"
+  val launchPort = 9999
+  val origin = "http://localhost:9999"
 }
 
 object AppConfig {

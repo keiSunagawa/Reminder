@@ -1,5 +1,6 @@
 package me.kerfume.reminder.server
 
+import me.kerfume.reminder.domain.remind.Remind
 import sttp.model.StatusCode
 
 object EndPoints {
@@ -29,17 +30,19 @@ object EndPoints {
         oneOf(statusMapping(StatusCode.NotFound, stringBody))
       }
 
-  val list: Endpoint[WithSessionKey[Unit], ErrorInfo, String, Nothing] =
+  val list: Endpoint[WithSessionKey[Unit], ErrorInfo, ListResponse, Nothing] =
     endpoint.get
       .in("list")
       .in(
         cookie[Option[String]](sessionCookie)
           .map(WithSessionKey(_, ()))(_.sessionKey)
       )
-      .out(htmlBodyUtf8)
+      .out(jsonBody[ListResponse])
       .errorOut(ErrorInfo.errorInfoOutput)
 
-  val twitterAuth: Endpoint[(String, String), ErrorInfo, String, Nothing] =
+  def twitterAuth(
+      origin: String
+  ): Endpoint[(String, String), ErrorInfo, String, Nothing] =
     endpoint.get
       .in("auth")
       .in(query[String]("oauth_token"))
@@ -50,10 +53,11 @@ object EndPoints {
             StatusCode.TemporaryRedirect,
             //stringBody
             header("Cache-Control", "no-cache") and
-              header("Location", "https://reminder.kerfume.me:30080/list") and
+              header("Location", s"${origin}/list") and
               header[String]("Set-Cookie")
           )
         )
       )
       .errorOut(ErrorInfo.errorInfoOutput)
+
 }

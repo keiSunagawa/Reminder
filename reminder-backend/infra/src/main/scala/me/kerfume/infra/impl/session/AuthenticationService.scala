@@ -19,7 +19,7 @@ class AuthenticationService(
       callBack: Uri
   ): IO[TwitterSessionInitResult] = {
     for {
-      sessionOpt <- sessionKey.traverse(sessions.getSession).map { _.flatten }
+      sessionOpt <- sessionKey.flatTraverse(sessions.getSession)
       res <- sessionOpt match {
         case Some(s) => IO { SessionExists(s) }
         case None =>

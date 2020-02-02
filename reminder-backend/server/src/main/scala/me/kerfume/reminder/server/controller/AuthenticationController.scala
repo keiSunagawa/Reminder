@@ -7,19 +7,19 @@ import me.kerfume.infra.impl.session.AuthenticationService.{
   SessionExists
 }
 import me.kerfume.reminder.server.ErrorInfo
+import sttp.model.Uri
 
 class AuthenticationController(
     service: AuthenticationService
 ) {
-  import sttp.model.Uri._
-
   def withCheckAuthentication[A](
-      sessionKey: Option[String]
+      sessionKey: Option[String],
+      origin: String
   )(f: => IO[Either[ErrorInfo, A]]): IO[Either[ErrorInfo, A]] = {
     for {
       ares <- service.twitterAuthenticationInit(
         sessionKey,
-        uri"https://reminder.kerfume.me:30080/auth" // TODO input from application
+        Uri.parse(s"${origin}/auth").toOption.get
       )
       res <- ares match {
         case SessionExists(_) => f

@@ -2,6 +2,7 @@ package me.kerfume.reminder.server.controller
 import me.kerfume.reminder.domain.remind.RemindService
 import cats.{Applicative, Monad}
 import java.time.LocalDate
+import java.time.format.DateTimeFormatter
 
 import Monad.ops._
 import me.kerfume.reminder.domain.remind.Remind
@@ -10,6 +11,7 @@ import me.kerfume.reminder.domain.seqid.SeqID
 import cats.Bifunctor.ops._
 import cats.instances.either._
 import sttp.model.Uri
+import scala.util.chaining._
 
 class RegistController[F[_]: Monad](
     service: RemindService[F]
@@ -26,27 +28,22 @@ class RegistController[F[_]: Monad](
         Right("regist ok")
       }
 
-  def list(): F[String] = {
-    import scalatags.Text.all._
-    service.list().map { xs =>
-      val ofDates = xs.collect {
-        case r: Remind.OfDate =>
-          r
-      }
-
-      html(
-        body(
-          h1("Reminds"),
-          ul(
-            ofDates.map { r =>
-              li(
-                s"${r.seqID.num} ${r.title} ${r.trigger}",
-                a(href := s"/resolve/${r.seqID.num}")(b("resolve"))
-              )
-            }: _*
+  def list(): F[ListResponse] = {
+    service.list().map {
+      _.map {
+        case x: Remind.OfDate =>
+          RemindModelForView(
+            x.base.seqID.num,
+            x.base.title,
+            dateFormatter.format(x.trigger)
           )
-        )
-      ).toString
+        case x: Remind.OfDateTime =>
+          RemindModelForView(
+            x.base.seqID.num,
+            x.base.title,
+            dateFormatter.format(x.trigger)
+          )
+      }.pipe(ListResponse)
     }
   }
 
@@ -63,4 +60,14 @@ class RegistController[F[_]: Monad](
 object RegistController {
   case class RegistByDateParam(title: String, trigger: LocalDate)
   case class WithSessionKey[A](sessionKey: Option[String], params: A)
+
+  val dateFormatter = DateTimeFormatter.ofPattern("uuuu/MM/dd")
+  case class RemindModelForView(
+      id: Long,
+      title: String,
+      limit: String
+  )
+  case class ListResponse(
+      values: List[RemindModelForView]
+  )
 }
