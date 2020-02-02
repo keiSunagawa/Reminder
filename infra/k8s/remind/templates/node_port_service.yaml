@@ -12,6 +12,12 @@ spec:
       port: 50002 # for inner access
       targetPort: 443
       nodePort: 30080
+    - name: frontend
+      protocol: TCP
+      port: 50003 # for inner access
+      targetPort: 442
+      nodePort: 30081
+
   selector:
     app.kubernetes.io/name: {{ include "remind.nginx.name" . }}
     app.kubernetes.io/instance: {{ .Release.Name }}

@@ -7,6 +7,8 @@ metadata:
 data:
   nginx-default.conf: |
 {{- tpl (.Files.Get "files/nginx-default.conf") . | nindent 4 }}
+  reminder-frontend-settings.js: |
+{{- tpl (.Files.Get "files/reminder-frontend-settings.js") . | nindent 4 }}
   nginx-certificate.pem: |
 {{- .Values.application.nginx.certificate | nindent 4 }}
   nginx-certificate.key: |

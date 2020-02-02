@@ -13,11 +13,17 @@ object ErrorInfo {
   }
   case class Redirect(uri: Uri) extends ErrorInfo
   object Redirect {
+//    implicit val codecPlaneText
+//        : Codec[Redirect, CodecFormat.TextPlain, String] =
+//      Codec.stringPlainCodecUtf8.map(
+//        s => Redirect(Uri.parse(s).toOption.get) // FIXME unsafe
+//      )(_.uri.toString)
+    // FIXME: frontend: Affjaxがredirectをマニュアル制御できないので200で返す, affjaxの代替えが見つかればそちらを使う
     implicit val codecPlaneText
         : Codec[Redirect, CodecFormat.TextPlain, String] =
       Codec.stringPlainCodecUtf8.map(
         s => Redirect(Uri.parse(s).toOption.get) // FIXME unsafe
-      )(_.uri.toString)
+      )(x => s"go redirect: ${x.uri.toString}")
   }
 
   import sttp.tapir._
@@ -25,9 +31,16 @@ object ErrorInfo {
   def errorInfoOutput: EndpointOutput[ErrorInfo] =
     oneOf[ErrorInfo](
       statusMapping(StatusCode.BadRequest, plainBody[BadRequest]),
+//      statusMapping(
+//        StatusCode.MovedPermanently,
+//        header("Cache-Control", "no-cache") and header[Redirect]("Location")
+//      )
+      // FIXME: frontend: Affjaxがredirectをマニュアル制御できないので200で返す, affjaxの代替えが見つかればそちらを使う
       statusMapping(
-        StatusCode.MovedPermanently,
-        header("Cache-Control", "no-cache") and header[Redirect]("Location")
+        StatusCode.Ok,
+        header("Cache-Control", "no-cache") and plainBody[
+          Redirect
+        ]
       )
     )
 }

@@ -18,7 +18,7 @@ object Docker {
     },
     imageNames in docker := Seq(
       // Sets the latest tag
-      ImageName(s"keisunagawa/${name.value}:test-impl-auth")
+      ImageName(s"keisunagawa/${name.value}:latest")
     ),
     assemblyMergeStrategy in assembly := {
       case PathList("javax", "servlet", xs @ _*) => MergeStrategy.first

@@ -18,17 +18,23 @@ spec:
     spec:
       containers:
         - name: "nginx-cnt"
-          image: "nginx:latest"
-          imagePullPolicy: IfNotPresent
+          image: "keisunagawa/reminder-frontend:latest"
+          imagePullPolicy: Always
           ports:
             - name: https
               containerPort: 443
+              protocol: TCP
+            - name: front-end
+              containerPort: 9999
               protocol: TCP
           volumeMounts:
             - mountPath: /etc/nginx/conf.d
               name: config-vol
             - mountPath: /etc/nginx/ssl/
               name: ssl-vol
+            - mountPath: /usr/share/nginx/html/settings.js
+              name: frontend-vol
+              subPath: settings.js
       volumes:
         - name: config-vol
           configMap:
@@ -36,6 +42,12 @@ spec:
             items:
               - key: "nginx-default.conf"
                 path: "default.conf"
+        - name: frontend-vol
+          configMap:
+            name: {{ include "remind.config.name" . }}
+            items:
+              - key: "reminder-frontend-settings.js"
+                path: "settings.js"
         - name: ssl-vol
           configMap:
             name: {{ include "remind.config.name" . }}

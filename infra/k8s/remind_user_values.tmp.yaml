@@ -6,3 +6,5 @@ application:
   twitter:
     key: ""
     secret: ""
+
+domain: ""
