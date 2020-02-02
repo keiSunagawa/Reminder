@@ -5,7 +5,7 @@ You can edit this file as you like.
 { name =
     "reminder-frontend"
 , dependencies =
-    [ "console", "effect", "halogen", "psci-support" ]
+    [ "console", "effect", "halogen", "psci-support", "kerfume-pure-std", "aff", "random", "exceptions" ]
 , packages =
     ./packages.dhall
 , sources =

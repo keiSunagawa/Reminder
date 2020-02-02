@@ -123,6 +123,15 @@ let upstream =
 
 let overrides = {=}
 
-let additions = {=}
+let additions =
+  { kerfume-pure-std =
+       { dependencies =
+           [ "maybe", "either", "lists" ]
+       , repo =
+           "https://github.com/keiSunagawa/kerfume-pure-std.git"
+       , version =
+           "master"
+       }
+  }
 
 in  upstream // overrides // additions
