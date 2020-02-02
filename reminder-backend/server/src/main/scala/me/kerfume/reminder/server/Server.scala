@@ -5,7 +5,16 @@ import cats.effect.{ExitCode, IO}
 import org.http4s.HttpRoutes
 import org.http4s.HttpApp
 import cats.SemigroupK.ops._
+import me.kerfume.infra.impl.session.AuthenticationService
+import me.kerfume.infra.impl.session.AuthenticationService.{
+  NeedGetTwitterOAuthToken,
+  SessionExists
+}
 import org.http4s.implicits._
+import me.kerfume.reminder.server.controller.{
+  AuthenticationController,
+  RegistController
+}
 import me.kerfume.reminder.server.controller.RegistController
 import org.http4s.server.middleware.{CORS, CORSConfig}
 
@@ -26,17 +35,40 @@ object ReminderServer extends IOApp {
       registCtr.resolve(id)
     }
 
-  def listRoute(registCtr: RegistController[IO]): HttpRoutes[IO] =
-    list.toRoutes { _ =>
-      registCtr.list()
+  def listRoute(
+      registCtr: RegistController[IO],
+      aCtr: AuthenticationController,
+      config: AppConfig
+  ): HttpRoutes[IO] =
+    list.toRoutes { s =>
+      aCtr.withCheckAuthentication(s.sessionKey, config.origin) {
+        registCtr.list().map(Right(_))
+      }
+    }
+
+  def authRoute(
+      aCtr: AuthenticationController,
+      config: AppConfig
+  ): HttpRoutes[IO] =
+    twitterAuth(config.origin).toRoutes {
+      case (key, verify) =>
+        import cats.syntax.applicativeError._
+        println(verify)
+        aCtr.authentication(key, verify).onError { e =>
+          println(e.getMessage)
+          e.printStackTrace()
+          IO.unit
+        }
     }
 
   def reminderApp(
-      registCtr: RegistController[IO]
+      registCtr: RegistController[IO],
+      aCtr: AuthenticationController,
+      config: AppConfig
   ): HttpApp[IO] =
-    (registRoute(registCtr) <+> listRoute(registCtr) <+> resolveRoute(
+    (registRoute(registCtr) <+> listRoute(registCtr, aCtr, config) <+> resolveRoute(
       registCtr
-    )).orNotFound
+    ) <+> authRoute(aCtr, config)).orNotFound
 
   def run(args: List[String]): IO[ExitCode] = {
     val env =
@@ -55,7 +87,10 @@ object ReminderServer extends IOApp {
       maxAge = 1.day.toSeconds
     )
     // With Middlewares in place
-    val finalHttpApp = CORS(reminderApp(app.registController), originConfig)
+    val finalHttpApp = CORS(
+      reminderApp(app.registController, app.authenticationController, config),
+      originConfig
+    )
     BlazeServerBuilder[IO]
       .bindHttp(config.launchPort, "0.0.0.0")
       .withHttpApp(finalHttpApp)

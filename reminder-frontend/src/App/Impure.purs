@@ -48,10 +48,12 @@ getList = do
     Left e -> throwError e
     Right xs -> pure xs
   where
-    req = AX.request AX.defaultRequest { url = apiEndpoint
-                              , method = Left GET
-                              , responseFormat = ResponseFormat.string
-                              }
+    req = AX.request AX.defaultRequest
+                                       { url = apiEndpoint
+                                       , method = Left GET
+                                       , responseFormat = ResponseFormat.string
+                                       , withCredentials = true
+                                       }
     getBody :: Either AX.Error (AX.Response String) -> Either Error (RemindJson)
     getBody (Right res) = lmap raise decode0
       where

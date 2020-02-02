@@ -84,7 +84,7 @@ class OAuthClient(
       (genCommonParams(config.consumerKey) ++
         oAuthToken
           .map(ot => "oauth_token" -> EncodableString.pure(ot.token))
-          .toMap).pipe(paramsModF)
+          .toMap) pipe paramsModF
 
     val signature = Signature.createSignature(
       requestMethod,

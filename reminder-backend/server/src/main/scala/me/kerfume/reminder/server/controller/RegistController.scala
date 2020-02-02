@@ -1,6 +1,6 @@
 package me.kerfume.reminder.server.controller
 import me.kerfume.reminder.domain.remind.RemindService
-import cats.Monad
+import cats.{Applicative, Monad}
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -10,6 +10,7 @@ import cats.syntax.either._
 import me.kerfume.reminder.domain.seqid.SeqID
 import cats.Bifunctor.ops._
 import cats.instances.either._
+import sttp.model.Uri
 import scala.util.chaining._
 
 class RegistController[F[_]: Monad](
@@ -27,7 +28,7 @@ class RegistController[F[_]: Monad](
         Right("regist ok")
       }
 
-  def list(): F[Either[Unit, ListResponse]] = {
+  def list(): F[ListResponse] = {
     service.list().map {
       _.map {
         case x: Remind.OfDate =>
@@ -42,7 +43,7 @@ class RegistController[F[_]: Monad](
             x.base.title,
             dateFormatter.format(x.trigger)
           )
-      }.pipe(ListResponse).asRight
+      }.pipe(ListResponse)
     }
   }
 
@@ -58,6 +59,7 @@ class RegistController[F[_]: Monad](
 
 object RegistController {
   case class RegistByDateParam(title: String, trigger: LocalDate)
+  case class WithSessionKey[A](sessionKey: Option[String], params: A)
 
   val dateFormatter = DateTimeFormatter.ofPattern("uuuu/MM/dd")
   case class RemindModelForView(

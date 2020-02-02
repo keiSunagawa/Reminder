@@ -8,7 +8,7 @@ object ReminderServer {
     .enablePlugins(DockerPlugin)
     .settings(Base.baseSettings)
     .settings(
-      libraryDependencies ++= typesafeConfig ++ tapir ++ circe ++ scalaTag
+      libraryDependencies ++= typesafeConfig ++ tapir ++ circe ++ scalaTag ++ logback
     )
     .settings(Docker.dockerSettings)
 }

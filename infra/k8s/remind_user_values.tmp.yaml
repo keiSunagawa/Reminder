@@ -3,3 +3,6 @@ application:
   nginx:
     certificate: ""
     certificateKey: ""
+  twitter:
+    key: ""
+    secret: ""
