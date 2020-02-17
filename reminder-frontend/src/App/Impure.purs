@@ -29,11 +29,13 @@ import Foreign.Generic (defaultOptions, genericDecodeJSON)
 
 foreign import goHref :: String -> String
 
-resolveRemind :: Int -> Effect Unit
-resolveRemind id = do
-  i <- randomInt 1 10
-  if i < 8 then pure unit else throwException $ error "ops"
-  logShow $ "resolve id: " <> (show i) <> " ok"
+resolveRemind :: Int -> Aff Unit
+resolveRemind id = void $ AX.request AX.defaultRequest
+                              { url = apiEndpoint
+                              , method = Left GET
+                              , responseFormat = ResponseFormat.string
+                              , withCredentials = true
+                              }
 
 -- fetchReminds :: Aff Reminds
 -- fetchReminds = pure $ {id: 1, title: "a", limit: "12:00"} : {id: 2, title: "bb", limit: "15:00"} : Nil

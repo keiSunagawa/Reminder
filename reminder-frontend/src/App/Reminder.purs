@@ -69,7 +69,7 @@ handleAction = case _ of
     H.modify_ \st -> st { enabled = not st.enabled }
   Resolve i ->
     do
-      H.liftEffect $ resolveRemind i
+      H.liftAff $ resolveRemind i
       H.modify_ \st -> st { reminds = RO.resolve i st.reminds }
       pure unit
 
