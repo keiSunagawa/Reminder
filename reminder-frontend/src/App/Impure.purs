@@ -31,7 +31,7 @@ foreign import goHref :: String -> String
 
 resolveRemind :: Int -> Aff Unit
 resolveRemind id = void $ AX.request AX.defaultRequest
-                              { url = apiEndpoint
+                              { url = apiEndpoint <> "/" <> "resolve" <> "/" <> (show id)
                               , method = Left GET
                               , responseFormat = ResponseFormat.string
                               , withCredentials = true
@@ -60,7 +60,7 @@ getList = do
     Right xs -> pure xs
   where
     req = AX.request AX.defaultRequest
-                                       { url = apiEndpoint
+                                       { url = apiEndpoint <> "/" <> "list"
                                        , method = Left GET
                                        , responseFormat = ResponseFormat.string
                                        , withCredentials = true
